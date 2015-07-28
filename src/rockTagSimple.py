@@ -35,71 +35,59 @@ sc = SparkContext('local', 'Rock Tag')
 dbpath = '/root/data/AdditionalFiles/'
 # Get list of songs with mbtags, artist, and independent vars
 
-def getTrackLabels(dbpath, verbose=False):
+## Get artist mbtags from subset_artist_term.db (table = artist_mbtag)
+dbname ='subset_artist_term.db'
 
-	## Get artist mbtags from subset_artist_term.db (table = artist_mbtag)
-	dbname ='subset_artist_term.db'
+with sqlite3.connect(dbpath+dbname) as conn:
+	c = conn.cursor()
+	c.execute("SELECT artist_id, mbtag FROM artist_mbtag")
+	artistTags = sc.parallelize(c.fetchall())
 
-	with sqlite3.connect(dbpath+dbname) as conn:
-		c = conn.cursor()
-		c.execute("SELECT artist_id, mbtag FROM artist_mbtag")
-		artistTags = sc.parallelize(c.fetchall())
+# group tags by artist
+artistTagList = artistTags.groupByKey()
+print(artistTagList.take(3))
 
-	# group tags by artist
-	artistTagList = artistTags.groupByKey()
 
-	if verbose: print(artistTagList.take(3))
-	
-	# check if rock in group tag or not
-	artistRocks = artistTagList.map(lambda (ar, tags): (ar, float(sum(['rock' in tag for tag in tags]) > 0)))
-	
-	if verbose: print(artistRocks.take(3))
+# check if rock in group tag or not
+artistRocks = artistTagList.map(lambda (ar, tags): (ar, float(sum(['rock' in tag for tag in tags]) > 0)))
+artistRocks.take(3)
 
-	# merge song with artist
 
-	## Match artist to track using subset_track_metadata.db (table = songs)
+# merge song with artist
 
-	dbname ='subset_track_metadata.db'
+## Match artist to track using subset_track_metadata.db (table = songs)
 
-	with sqlite3.connect(dbpath+dbname) as conn:
-		c = conn.cursor()
-		c.execute("SELECT artist_id, track_id FROM songs")
-		trackArtist = sc.parallelize(c.fetchall())
+dbname ='subset_track_metadata.db'
 
-	if verbose: print(trackArtist.take(3))
+with sqlite3.connect(dbpath+dbname) as conn:
+	c = conn.cursor()
+	c.execute("SELECT artist_id, track_id FROM songs")
+	trackArtist = sc.parallelize(c.fetchall())
 
-	trackRocks = trackArtist.leftOuterJoin(artistRocks).map(lambda (ar, (tr, rocks)): (tr, rocks))
-	
-	if verbose: print(trackRocks.take(3))
+trackArtist.take(3)
 
-	return trackRocks
+trackRocks = trackArtist.leftOuterJoin(artistRocks).map(lambda (ar, (tr, rocks)): (tr, rocks))
+trackRocks.take(3)
 
-def getTrackFeatures(dbpath, verbose=False):
-	# get song data and merge
+# get song data and merge
 
-	## Get song data from subset_msd_summary_file.h5[analysis][songs]
-	file_name = 'subset_msd_summary_file.h5'
-	#songData = sc.parallelize(list(h5py.File(dbpath+file_name, 'r')['analysis']['songs'][:]))
-	#list(h5py.File(dbpath+file_name, 'r')['analysis']['songs'][:])[0].length()
-	#list(h5py.File(dbpath+file_name, 'r')['analysis']['songs'][:])[0][30]
-	songData = sc.parallelize(h5py.File(dbpath+file_name, 'r')['analysis']['songs'][:]).map(lambda x: (x[30], (x[3], x[4], x[21], x[23], x[24], x[27], x[28])))
-	
-	if verbose: songData.take(3);
+## Get song data from subset_msd_summary_file.h5[analysis][songs]
+file_name = 'subset_msd_summary_file.h5'
+#songData = sc.parallelize(list(h5py.File(dbpath+file_name, 'r')['analysis']['songs'][:]))
+#list(h5py.File(dbpath+file_name, 'r')['analysis']['songs'][:])[0].length()
+#list(h5py.File(dbpath+file_name, 'r')['analysis']['songs'][:])[0][30]
+songData = sc.parallelize(h5py.File(dbpath+file_name, 'r')['analysis']['songs'][:]).map(lambda x: (x[30], (x[3], x[4], x[21], x[23], x[24], x[27], x[28])))
+songData.take(3)
 
-	return songData
+# 30 = track_id
 
-	# 30 = track_id
-
-	# 3 = duration
-	# 4 = danceability
-	# 21 = key
-	# 23 = loudness
-	# 24 = mode
-	# 27 = tempo
-	# 28 = time_signature
-
-songData = getTrackFeatures(dbpath)
-trackRocks = getTrackLabels(dbpath)
+# 3 = duration
+# 4 = danceability
+# 21 = key
+# 23 = loudness
+# 24 = mode
+# 27 = tempo
+# 28 = time_signature
 
 allData = trackRocks.join(songData).map(lambda (tr, (rocks, data)): (tr, (0.0 if rocks is None else rocks, data)))
 allData.take(3)
