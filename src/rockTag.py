@@ -37,7 +37,7 @@ logData = sc.textFile(logFile).cache()
 
 
 #dbpath = '/vagrant/MillionSongSubset/AdditionalFiles/'
-dbpath = '/root/AdditionalFiles/'
+dbpath = '/root/data/AdditionalFiles/'
 # Get list of songs with mbtags, artist, and independent vars
 
 ## Get artist mbtags from subset_artist_term.db (table = artist_mbtag)
