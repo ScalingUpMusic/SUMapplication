@@ -74,8 +74,8 @@ trackRocks.take(3)
 ## Get song data from subset_msd_summary_file.h5[analysis][songs]
 file_name = 'subset_msd_summary_file.h5'
 #songData = sc.parallelize(list(h5py.File(dbpath+file_name, 'r')['analysis']['songs'][:]))
-list(h5py.File(dbpath+file_name, 'r')['analysis']['songs'][:])[0].length()
-list(h5py.File(dbpath+file_name, 'r')['analysis']['songs'][:])[0][30]
+#list(h5py.File(dbpath+file_name, 'r')['analysis']['songs'][:])[0].length()
+#list(h5py.File(dbpath+file_name, 'r')['analysis']['songs'][:])[0][30]
 songData = sc.parallelize(h5py.File(dbpath+file_name, 'r')['analysis']['songs'][:]).map(lambda x: (x[30], (x[3], x[4], x[21], x[23], x[24], x[27], x[28])))
 songData.take(3)
 
