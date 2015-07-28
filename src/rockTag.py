@@ -30,7 +30,7 @@ def randomSplit(rdd, weights, seed=None):
 		seed = random.randint(0, 2 ** 32 - 1)
 	return [rdd.mapPartitionsWithIndex(RDDRangeSampler(lb, ub, seed).func, True) for lb, ub in zip(cweights, cweights[1:])]
 
-logFile = '$SPARK_HOME/log/rockTag.txt'
+logFile = '/usr/local/spark/logs/rockTag.txt'
 sc = SparkContext('local', 'Rock Tag')
 logData = sc.textFile(logFile).cache()
 
@@ -50,5 +50,5 @@ with sqlite3.connect(dbpath+dbname) as conn:
 
 # group tags by artist
 artistTagList = artistTags.groupByKey()
-artistTagList.take(3)
+print(artistTagList.take(3))
 
