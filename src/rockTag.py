@@ -30,12 +30,7 @@ def randomSplit(rdd, weights, seed=None):
 		seed = random.randint(0, 2 ** 32 - 1)
 	return [rdd.mapPartitionsWithIndex(RDDRangeSampler(lb, ub, seed).func, True) for lb, ub in zip(cweights, cweights[1:])]
 
-sc = SparkContext('local', 'Rock Tag')
-
-dbpath = '/root/data/AdditionalFiles/'
-# Get list of songs with mbtags, artist, and independent vars
-
-def getTrackLabels(dbpath, verbose=False):
+def getTrackLabels(dbpath, tagstring='rock', verbose=False):
 
 	## Get artist mbtags from subset_artist_term.db (table = artist_mbtag)
 	dbname ='subset_artist_term.db'
@@ -51,7 +46,7 @@ def getTrackLabels(dbpath, verbose=False):
 	if verbose: print(artistTagList.take(3))
 	
 	# check if rock in group tag or not
-	artistRocks = artistTagList.map(lambda (ar, tags): (ar, float(sum(['rock' in tag for tag in tags]) > 0)))
+	artistRocks = artistTagList.map(lambda (ar, tags): (ar, float(sum([tagstring in tag for tag in tags]) > 0)))
 	
 	if verbose: print(artistRocks.take(3))
 
@@ -98,20 +93,22 @@ def getTrackFeatures(dbpath, verbose=False):
 	# 27 = tempo
 	# 28 = time_signature
 
-songData = getTrackFeatures(dbpath)
-trackRocks = getTrackLabels(dbpath)
+sc = SparkContext('local', 'Rock Tag')
+verbose = False
 
+dbpath = '/root/data/AdditionalFiles/'
+tagstring = 'rock'
+# Get list of songs with mbtags, artist, and independent vars
+songData = getTrackFeatures(dbpath, verbose=verbose)
+trackRocks = getTrackLabels(dbpath, tagstring=tagstring, verbose=verbose)
 allData = trackRocks.join(songData)
-allData.take(3)
+if verbose: allData.take(3)
 
 # label data
-
-# only uses one feature for now
-#labeledData = allData.map(lambda (tr, (rocks, data)): LabeledPoint(rocks, [data[6]]))
-#labeledData = allData.map(lambda (tr, (rocks, data)): LabeledPoint(rocks, [random.random() + (.5 if rocks == 1 else 0)]))
-
 labels = allData.map(lambda (tr, (rocks, data)): rocks)
 features = allData.map(lambda (tr, (rocks, data)): data)
+
+
 std = StandardScaler(True, True).fit(features)
 scaledFeatures = std.transform(features)
 
@@ -146,7 +143,7 @@ trainData, testData = randomSplit(equalSampleData, [0.9, 0.1])
 trainData.map(lambda p: (p.label, p.features)).take(3)
 
 # train model
-model = LogisticRegressionWithSGD.train(trainData, intercept = False, iterations=10000)
+model = LogisticRegressionWithSGD.train(trainData, intercept = False, iterations=1000)
 #model = LinearRegressionWithSGD.train(trainData, step = 0.1, iterations=1000)
 #model = SVMWithSGD.train(trainData, step=1, iterations=1000, intercept=True)
 
