@@ -8,7 +8,7 @@ from pyspark.mllib.classification import NaiveBayes, LogisticRegressionWithSGD, 
 from pyspark.rddsampler import RDDSamplerBase
 from pyspark.mllib.feature import StandardScaler
 
-sc = SparkContext('local', 'Rock Tag')
+sc = SparkContext('local', 'One Tag')
 
 class RDDRangeSampler(RDDSamplerBase):
 	def __init__(self, lowerBound, upperBound, seed=None):
