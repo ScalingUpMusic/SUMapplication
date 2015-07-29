@@ -180,7 +180,7 @@ def main(argv):
 		elif opt in ("-d", "--datapath"):
 			dbpath = arg
 		elif opt in ("-t", "--tagstring"):
-			tagstring = arg
+			tagstring = str(arg).lower()
 
 	if verbose:
 		print('data path: ' + dbpath)
