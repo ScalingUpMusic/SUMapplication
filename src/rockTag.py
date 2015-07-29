@@ -134,7 +134,7 @@ def rebalanceSample(labeledData):
 	cutoff = float(nrock) / (nrock + nxrock)
 
 	# recombine
-	return labeled1.union(labeled0.filter(lambda: random.random() < cutoff))
+	return labeled1.union(labeled0.filter(lambda p: random.random() < cutoff))
 
 	#equalSampleData = labeledData.filter(lambda p: random.random() < cutoff if p.label != 1.0 else True)
 
