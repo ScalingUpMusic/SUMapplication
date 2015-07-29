@@ -112,7 +112,7 @@ verbose = False
 dbpath = '/root/data/AdditionalFiles/'
 tagstring = 'rock'
 
-labels, features = getLabelsAndFeatures(dbpath, tagstring=tagstring, scale_features=True, feature_scaler=None, verbose=verbose)
+labels, features = getLabelsAndFeatures(dbpath, tagstring=tagstring, verbose=verbose)
 
 std = StandardScaler(True, True).fit(features)
 scaledFeatures = std.transform(features)
