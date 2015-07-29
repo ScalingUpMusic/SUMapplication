@@ -1,5 +1,5 @@
 import sqlite3
-import sys
+import sys, getopt
 import random
 import h5py
 from pyspark import SparkContext
@@ -158,6 +158,22 @@ def main(argv):
 
 	dbpath = '/root/data/AdditionalFiles/'
 	tagstring = 'rock'
+
+	try:
+		opts, args = getopt.getopt(argv,"hvd:t:",["help","verbose","datapath=","tagstring="])
+	except getopt.GetoptError:
+		print 'rockTag.py -d <data path> -t <tag string>'
+		sys.exit(2)
+	for opt, arg in opts:
+		if opt == '-h':
+			print 'rockTag.py -d <data path> -t <tag string>'
+			sys.exit()
+		elif opt in ("-v", "--verbose"):
+			verbose = True
+		elif opt in ("-d", "--datapath"):
+			dbpath = arg
+		elif opt in ("-t", "--tagstring"):
+			tagstring = arg
 
 	labels, features = getLabelsAndFeatures(dbpath, tagstring=tagstring, verbose=verbose)
 
