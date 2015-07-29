@@ -49,7 +49,7 @@ def getTrackLabels(dbpath, tagstring='rock', verbose=False):
 	if verbose: print(artistTagList.take(3))
 	
 	# check if rock in group tag or not
-	artistRocks = artistTagList.map(lambda (ar, tags): (ar, float(sum([tagstring in tag for tag in tags]) > 0)))
+	artistRocks = artistTagList.map(lambda (ar, tags): (ar, float(sum([tagstring in tag.lower() for tag in tags]) > 0)))
 	
 	if verbose: print(artistRocks.take(3))
 
