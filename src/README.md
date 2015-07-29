@@ -17,3 +17,9 @@ Note that $SPARK_HOME is set to ```/usr/local/spark```
 ## rockTagShell.py
 
 Runs in the shell (doesn't set up SparkContext because shell does that)
+
+## data notes
+
+downloaded additional files
+
+	rsync -avzuP publicdata.opensciencedatacloud.org::ark:/31807/osdc-c1c763e4/AdditionalFiles.tar.gz /root/data/AdditionalFiles.tar.gz

@@ -33,10 +33,10 @@ def randomSplit(rdd, weights, seed=None):
 		seed = random.randint(0, 2 ** 32 - 1)
 	return [rdd.mapPartitionsWithIndex(RDDRangeSampler(lb, ub, seed).func, True) for lb, ub in zip(cweights, cweights[1:])]
 
-def getTrackLabels(dbpath, tagstring='rock', verbose=False):
+def getTrackLabels(dbpath, tagstring='rock', verbose=False, usealldata=False):
 
 	## Get artist mbtags from subset_artist_term.db (table = artist_mbtag)
-	dbname ='subset_artist_term.db'
+	dbname = 'artist_term.db' if usealldata else 'subset_artist_term.db'
 
 	with sqlite3.connect(dbpath+dbname) as conn:
 		c = conn.cursor()
@@ -57,7 +57,7 @@ def getTrackLabels(dbpath, tagstring='rock', verbose=False):
 
 	## Match artist to track using subset_track_metadata.db (table = songs)
 
-	dbname ='subset_track_metadata.db'
+	dbname = 'track_metadata.db' if usealldata else 'subset_track_metadata.db'
 
 	with sqlite3.connect(dbpath+dbname) as conn:
 		c = conn.cursor()
@@ -72,11 +72,11 @@ def getTrackLabels(dbpath, tagstring='rock', verbose=False):
 
 	return trackRocks.map(lambda (tr, rocks): (tr, 0.0 if rocks is None else rocks))
 
-def getTrackFeatures(dbpath, verbose=False):
+def getTrackFeatures(dbpath, verbose=False, usealldata=False):
 	# get song data and merge
 
 	## Get song data from subset_msd_summary_file.h5[analysis][songs]
-	file_name = 'subset_msd_summary_file.h5'
+	file_name = 'msd_summary_file.h5' if usealldata else 'subset_msd_summary_file.h5'
 	#songData = sc.parallelize(list(h5py.File(dbpath+file_name, 'r')['analysis']['songs'][:]))
 	#list(h5py.File(dbpath+file_name, 'r')['analysis']['songs'][:])[0].length()
 	#list(h5py.File(dbpath+file_name, 'r')['analysis']['songs'][:])[0][30]
@@ -96,10 +96,10 @@ def getTrackFeatures(dbpath, verbose=False):
 	# 27 = tempo
 	# 28 = time_signature
 
-def getLabelsAndFeatures(dbpath, tagstring='rock', verbose=False):
+def getLabelsAndFeatures(dbpath, tagstring='rock', verbose=False, usealldata=False):
 	# Get list of songs with mbtags, artist, and independent vars
-	songData = getTrackFeatures(dbpath, verbose=verbose)
-	trackRocks = getTrackLabels(dbpath, tagstring=tagstring, verbose=verbose)
+	songData = getTrackFeatures(dbpath, verbose=verbose, usealldata=usealldata)
+	trackRocks = getTrackLabels(dbpath, tagstring=tagstring, verbose=verbose, usealldata=usealldata)
 	allData = trackRocks.join(songData)
 	if verbose: allData.take(3)
 
@@ -165,9 +165,10 @@ def main(argv):
 
 	dbpath = '/root/data/AdditionalFiles/'
 	tagstring = 'rock'
+	usealldata = False
 
 	try:
-		opts, args = getopt.getopt(argv,"hvd:t:",["help","verbose","datapath=","tagstring="])
+		opts, args = getopt.getopt(argv,"hvd:t:a",["help","verbose","datapath=","tagstring=","alldata"])
 	except getopt.GetoptError:
 		print 'rockTag.py -d <data path> -t <tag string>'
 		sys.exit(2)
@@ -181,12 +182,14 @@ def main(argv):
 			dbpath = arg
 		elif opt in ("-t", "--tagstring"):
 			tagstring = str(arg).lower()
+		elif opt in ("-a", "--alldata"):
+			usealldata = True
 
 	if verbose:
 		print('data path: ' + dbpath)
 		print('tag string: ' + tagstring)
 
-	labels, features = getLabelsAndFeatures(dbpath, tagstring=tagstring, verbose=verbose)
+	labels, features = getLabelsAndFeatures(dbpath, tagstring=tagstring, verbose=verbose, usealldata=usealldata)
 
 	# scale features
 	std = StandardScaler(True, True).fit(features)
