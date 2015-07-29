@@ -141,20 +141,22 @@ def evaluateModel(model, testData):
 	precision1 = guess1.filter(lambda (v, p): v == p).count() / float(guess1.count())
 
 	act1 = labelsAndPreds.filter(lambda (v, p): v == 1)
-	recall1 = act1.filter(lambda (v, p): v == p).count() / float(act1.count())
+	n1 = act1.count()
+	recall1 = act1.filter(lambda (v, p): v == p).count() / float(n1)
 
 	guess0 = labelsAndPreds.filter(lambda (v, p): p == 0)
 	precision0 = guess0.filter(lambda (v, p): v == p).count() / float(guess0.count())
 
 	act0 = labelsAndPreds.filter(lambda (v, p): v == 0)
-	recall0 = act0.filter(lambda (v, p): v == p).count() / float(act0.count())
+	n0 = act0.count()
+	recall0 = act0.filter(lambda (v, p): v == p).count() / float(n0)
 
 	trainErr = labelsAndPreds.filter(lambda (v, p): v != p).count() / float(testData.count())
 	baselineErr = testData.filter(lambda p: p.label == 1.0).count() / float(testData.count())
 	meanLabel = labelsAndPreds.map(lambda (l, p): l).mean()
 	meanGuess = labelsAndPreds.map(lambda (l, p): p).mean()
 
-	evalString = "0 | Recall = " + str(recall0) + " | Precision = " + str(precision0) + "\n1 | Recall = " + str(recall1) + " | Precision = " + str(precision1) + "\nTest Error = " + str(trainErr) + '\n' + 'Baseline Error = ' + str(baselineErr) + "\nMean Label = " + str(meanLabel) + "\nMean Prediction = " + str(meanGuess)
+	evalString = "0 | n = " + str(n0) + " | Recall = " + str(recall0) + " | Precision = " + str(precision0) + "\n1 | n = " + str(n1) + " | Recall = " + str(recall1) + " | Precision = " + str(precision1) + "\nTest Error = " + str(trainErr) + '\n' + 'Baseline Error = ' + str(baselineErr) + "\nMean Label = " + str(meanLabel) + "\nMean Prediction = " + str(meanGuess)
 	return evalString
 
 def main(argv):
