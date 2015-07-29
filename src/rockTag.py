@@ -150,7 +150,7 @@ def evaluateModel(model, testData):
 	meanGuess = labelsAndPreds.map(lambda (l, p): p).mean()
 
 	evalString = "0 | Recall = " + str(recall0) + " | Precision = " + str(precision0) + "\n1 | Recall = " + str(recall1) + " | Precision = " + str(precision1) + "\nTest Error = " + str(trainErr) + '\n' + 'Baseline Error = ' + str(baselineErr) + "\nMean Label = " + str(meanLabel) + "\nMean Prediction = " + str(meanGuess)
-
+	return evalString
 
 def main(argv):
 
@@ -180,10 +180,6 @@ def main(argv):
 	model = LogisticRegressionWithSGD.train(trainData, intercept = True, iterations=1000)
 	#model = LinearRegressionWithSGD.train(trainData, step = 0.1, iterations=1000)
 	#model = SVMWithSGD.train(trainData, step=1, iterations=1000, intercept=True)
-
-	# evaluate model
-	#labelsAndPreds = testData.map(lambda p: (p.label, 1 if model.predict(p.features) > 0.5 else 0))
-
 
 	evalString = evaluateModel(model, testData)
 	print(evalString)
