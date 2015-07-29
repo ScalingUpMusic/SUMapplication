@@ -72,7 +72,7 @@ def getTrackLabels(dbpath, verbose=False):
 	
 	if verbose: print(trackRocks.take(3))
 
-	return trackRocks.map(lambda (tr, rocks): (tr, (0.0 if rocks is None else rocks, data)))
+	return trackRocks.map(lambda (tr, rocks): (tr, 0.0 if rocks is None else rocks))
 
 def getTrackFeatures(dbpath, verbose=False):
 	# get song data and merge
