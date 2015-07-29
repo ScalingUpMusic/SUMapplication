@@ -111,48 +111,17 @@ def rebalanceSample(labeledData):
 	labeled1 = labeledData.filter(lambda p: p.label == 1.0)
 	labeled1.count()
 	labeled1.map(lambda p: p.features[0]).mean()
-	nrock = labeled1.count()
+	n1 = labeled1.count()
 
 	labeled0 = labeledData.filter(lambda p: p.label != 1.0)
 	labeled0.map(lambda p: p.features[0]).mean()
-	nxrock = labeled0.count()
+	n0= labeled0.count()
 
-	cutoff = float(nrock) / (nrock + nxrock)
+	cutoff = float(n1) / (n1 + n0)
 
 	# recombine
 	return labeled1.union(labeled0.filter(lambda p: random.random() < cutoff))
 
-
-sc = SparkContext('local', 'Rock Tag')
-verbose = False
-
-dbpath = '/root/data/AdditionalFiles/'
-tagstring = 'rock'
-
-labels, features = getLabelsAndFeatures(dbpath, tagstring=tagstring, verbose=verbose)
-
-# scale features
-std = StandardScaler(True, True).fit(features)
-scaledFeatures = std.transform(features)
-
-# make labeled data
-labeledData = labels.zip(scaledFeatures).map(lambda (label, data): LabeledPoint(label, data))
-if verbose: labeledData.take(3)
-
-# rebalance samples
-equalSampleData = rebalanceSample(labeledData)
-
-# split data
-trainData, testData = randomSplit(equalSampleData, [0.9, 0.1])
-if verbose: trainData.map(lambda p: (p.label, p.features)).take(3)
-
-# train model
-model = LogisticRegressionWithSGD.train(trainData, intercept = True, iterations=1000)
-#model = LinearRegressionWithSGD.train(trainData, step = 0.1, iterations=1000)
-#model = SVMWithSGD.train(trainData, step=1, iterations=1000, intercept=True)
-
-# evaluate model
-#labelsAndPreds = testData.map(lambda p: (p.label, 1 if model.predict(p.features) > 0.5 else 0))
 
 def evaluateModel(model, testData):
 
@@ -177,8 +146,46 @@ def evaluateModel(model, testData):
 	meanLabel = labelsAndPreds.map(lambda (l, p): l).mean()
 	meanGuess = labelsAndPreds.map(lambda (l, p): p).mean()
 
-	print("0 | Recall = " + str(recall0) + " | Precision = " + str(precision0) + "\n1 | Recall = " + str(recall1) + " | Precision = " + str(precision1) + "\nTest Error = " + str(trainErr) + '\n' + 'Baseline Error = ' + str(baselineErr) + "\nMean Label = " + str(meanLabel) + "\nMean Prediction = " + str(meanGuess))
+	evalString = "0 | Recall = " + str(recall0) + " | Precision = " + str(precision0) + "\n1 | Recall = " + str(recall1) + " | Precision = " + str(precision1) + "\nTest Error = " + str(trainErr) + '\n' + 'Baseline Error = ' + str(baselineErr) + "\nMean Label = " + str(meanLabel) + "\nMean Prediction = " + str(meanGuess)
 
 
-evaluateModel(model, testData)
+def main(argv):
+
+	sc = SparkContext('local', 'Rock Tag')
+	verbose = False
+
+	dbpath = '/root/data/AdditionalFiles/'
+	tagstring = 'rock'
+
+	labels, features = getLabelsAndFeatures(dbpath, tagstring=tagstring, verbose=verbose)
+
+	# scale features
+	std = StandardScaler(True, True).fit(features)
+	scaledFeatures = std.transform(features)
+
+	# make labeled data
+	labeledData = labels.zip(scaledFeatures).map(lambda (label, data): LabeledPoint(label, data))
+	if verbose: labeledData.take(3)
+
+	# rebalance samples
+	equalSampleData = rebalanceSample(labeledData)
+
+	# split data
+	trainData, testData = randomSplit(equalSampleData, [0.9, 0.1])
+	if verbose: trainData.map(lambda p: (p.label, p.features)).take(3)
+
+	# train model
+	model = LogisticRegressionWithSGD.train(trainData, intercept = True, iterations=1000)
+	#model = LinearRegressionWithSGD.train(trainData, step = 0.1, iterations=1000)
+	#model = SVMWithSGD.train(trainData, step=1, iterations=1000, intercept=True)
+
+	# evaluate model
+	#labelsAndPreds = testData.map(lambda p: (p.label, 1 if model.predict(p.features) > 0.5 else 0))
+
+
+	evalString = evaluateModel(model, testData)
+	print(evalString)
+
+if __name__ == "__main__":
+   main(sys.argv[1:])
 
