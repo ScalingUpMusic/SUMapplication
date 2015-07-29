@@ -93,21 +93,27 @@ def getTrackFeatures(dbpath, verbose=False):
 	# 27 = tempo
 	# 28 = time_signature
 
+def getLabelsAndFeatures(dbpath, tagstring='rock', verbose=False):
+	# Get list of songs with mbtags, artist, and independent vars
+	songData = getTrackFeatures(dbpath, verbose=verbose)
+	trackRocks = getTrackLabels(dbpath, tagstring=tagstring, verbose=verbose)
+	allData = trackRocks.join(songData)
+	if verbose: allData.take(3)
+
+	# label data
+	labels = allData.map(lambda (tr, (rocks, data)): rocks)
+	features = allData.map(lambda (tr, (rocks, data)): data)
+
+	return (labels, features)
+
+
 sc = SparkContext('local', 'Rock Tag')
 verbose = False
 
 dbpath = '/root/data/AdditionalFiles/'
 tagstring = 'rock'
-# Get list of songs with mbtags, artist, and independent vars
-songData = getTrackFeatures(dbpath, verbose=verbose)
-trackRocks = getTrackLabels(dbpath, tagstring=tagstring, verbose=verbose)
-allData = trackRocks.join(songData)
-if verbose: allData.take(3)
 
-# label data
-labels = allData.map(lambda (tr, (rocks, data)): rocks)
-features = allData.map(lambda (tr, (rocks, data)): data)
-
+labels, features = getLabelsAndFeatures(dbpath, tagstring=tagstring, verbose=verbose)
 
 std = StandardScaler(True, True).fit(features)
 scaledFeatures = std.transform(features)
@@ -143,7 +149,7 @@ trainData, testData = randomSplit(equalSampleData, [0.9, 0.1])
 trainData.map(lambda p: (p.label, p.features)).take(3)
 
 # train model
-model = LogisticRegressionWithSGD.train(trainData, intercept = False, iterations=1000)
+model = LogisticRegressionWithSGD.train(trainData, intercept = True, iterations=1000)
 #model = LinearRegressionWithSGD.train(trainData, step = 0.1, iterations=1000)
 #model = SVMWithSGD.train(trainData, step=1, iterations=1000, intercept=True)
 
