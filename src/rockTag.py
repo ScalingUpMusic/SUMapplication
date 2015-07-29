@@ -109,7 +109,7 @@ def getLabelsAndFeatures(dbpath, tagstring='rock', verbose=False):
 
 	return (labels, features)
 
-def rebalanceSample(labeledData):
+def rebalanceSample(labeledData, verbose=F):
 	# make sample sizes equal
 	labeled1 = labeledData.filter(lambda p: p.label == 1.0)
 	labeled1.count()
@@ -121,6 +121,11 @@ def rebalanceSample(labeledData):
 	n0= labeled0.count()
 
 	cutoff = float(n1) / (n1 + n0)
+
+	if verbose:
+		print('Tags Match : ' + str(n1))
+		print('Tags Miss  : ' + str(n0))
+		print('Percent    : ' + str(cutoff))
 
 	# recombine
 	return labeled1.union(labeled0.filter(lambda p: random.random() < cutoff))
@@ -175,6 +180,10 @@ def main(argv):
 		elif opt in ("-t", "--tagstring"):
 			tagstring = arg
 
+	if verbose:
+		print('data path: ' + dbpath)
+		print('tag string: ' + tagstring)
+
 	labels, features = getLabelsAndFeatures(dbpath, tagstring=tagstring, verbose=verbose)
 
 	# scale features
@@ -186,7 +195,7 @@ def main(argv):
 	if verbose: labeledData.take(3)
 
 	# rebalance samples
-	equalSampleData = rebalanceSample(labeledData)
+	equalSampleData = rebalanceSample(labeledData, verbose=verbose)
 
 	# split data
 	trainData, testData = randomSplit(equalSampleData, [0.9, 0.1])
