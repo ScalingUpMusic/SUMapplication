@@ -109,7 +109,7 @@ def getLabelsAndFeatures(dbpath, tagstring='rock', verbose=False):
 
 	return (labels, features)
 
-def rebalanceSample(labeledData, verbose=F):
+def rebalanceSample(labeledData, verbose=False):
 	# make sample sizes equal
 	labeled1 = labeledData.filter(lambda p: p.label == 1.0)
 	labeled1.count()
