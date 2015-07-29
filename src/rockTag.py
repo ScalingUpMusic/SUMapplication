@@ -106,20 +106,6 @@ def getLabelsAndFeatures(dbpath, tagstring='rock', verbose=False):
 
 	return (labels, features)
 
-sc = SparkContext('local', 'Rock Tag')
-verbose = False
-
-dbpath = '/root/data/AdditionalFiles/'
-tagstring = 'rock'
-
-labels, features = getLabelsAndFeatures(dbpath, tagstring=tagstring, verbose=verbose)
-
-std = StandardScaler(True, True).fit(features)
-scaledFeatures = std.transform(features)
-
-labeledData = labels.zip(scaledFeatures).map(lambda (label, data): LabeledPoint(label, data))
-if verbose: labeledData.take(3)
-
 def rebalanceSample(labeledData):
 	# make sample sizes equal
 	labeled1 = labeledData.filter(lambda p: p.label == 1.0)
@@ -136,15 +122,29 @@ def rebalanceSample(labeledData):
 	# recombine
 	return labeled1.union(labeled0.filter(lambda p: random.random() < cutoff))
 
-	#equalSampleData = labeledData.filter(lambda p: random.random() < cutoff if p.label != 1.0 else True)
 
+sc = SparkContext('local', 'Rock Tag')
+verbose = False
 
+dbpath = '/root/data/AdditionalFiles/'
+tagstring = 'rock'
+
+labels, features = getLabelsAndFeatures(dbpath, tagstring=tagstring, verbose=verbose)
+
+# scale features
+std = StandardScaler(True, True).fit(features)
+scaledFeatures = std.transform(features)
+
+# make labeled data
+labeledData = labels.zip(scaledFeatures).map(lambda (label, data): LabeledPoint(label, data))
+if verbose: labeledData.take(3)
+
+# rebalance samples
 equalSampleData = rebalanceSample(labeledData)
 
 # split data
 trainData, testData = randomSplit(equalSampleData, [0.9, 0.1])
-
-trainData.map(lambda p: (p.label, p.features)).take(3)
+if verbose: trainData.map(lambda p: (p.label, p.features)).take(3)
 
 # train model
 model = LogisticRegressionWithSGD.train(trainData, intercept = True, iterations=1000)
@@ -153,29 +153,32 @@ model = LogisticRegressionWithSGD.train(trainData, intercept = True, iterations=
 
 # evaluate model
 #labelsAndPreds = testData.map(lambda p: (p.label, 1 if model.predict(p.features) > 0.5 else 0))
-labelsAndPreds = testData.map(lambda p: (p.label, model.predict(p.features)))
 
-accuracy = labelsAndPreds.filter(lambda (v, p): v == p).count() / float(testData.count())
+def evaluateModel(model, testData):
 
-guess1 = labelsAndPreds.filter(lambda (v, p): p == 1)
-precision1 = guess1.filter(lambda (v, p): v == p).count() / float(guess1.count())
+	labelsAndPreds = testData.map(lambda p: (p.label, model.predict(p.features)))
 
-act1 = labelsAndPreds.filter(lambda (v, p): v == 1)
-recall1 = act1.filter(lambda (v, p): v == p).count() / float(act1.count())
+	accuracy = labelsAndPreds.filter(lambda (v, p): v == p).count() / float(testData.count())
 
-guess0 = labelsAndPreds.filter(lambda (v, p): p == 0)
-precision0 = guess0.filter(lambda (v, p): v == p).count() / float(guess0.count())
+	guess1 = labelsAndPreds.filter(lambda (v, p): p == 1)
+	precision1 = guess1.filter(lambda (v, p): v == p).count() / float(guess1.count())
 
-act0 = labelsAndPreds.filter(lambda (v, p): v == 0)
-recall0 = act0.filter(lambda (v, p): v == p).count() / float(act0.count())
+	act1 = labelsAndPreds.filter(lambda (v, p): v == 1)
+	recall1 = act1.filter(lambda (v, p): v == p).count() / float(act1.count())
 
-trainErr = labelsAndPreds.filter(lambda (v, p): v != p).count() / float(testData.count())
-baselineErr = testData.filter(lambda p: p.label == 1.0).count() / float(testData.count())
-meanLabel = labelsAndPreds.map(lambda (l, p): l).mean()
-meanGuess = labelsAndPreds.map(lambda (l, p): p).mean()
+	guess0 = labelsAndPreds.filter(lambda (v, p): p == 0)
+	precision0 = guess0.filter(lambda (v, p): v == p).count() / float(guess0.count())
 
-print("0 | Recall = " + str(recall0) + " | Precision = " + str(precision0) + "\n1 | Recall = " + str(recall1) + " | Precision = " + str(precision1) + "\nTest Error = " + str(trainErr) + '\n' + 'Baseline Error = ' + str(baselineErr) + "\nMean Label = " + str(meanLabel) + "\nMean Prediction = " + str(meanGuess))
+	act0 = labelsAndPreds.filter(lambda (v, p): v == 0)
+	recall0 = act0.filter(lambda (v, p): v == p).count() / float(act0.count())
+
+	trainErr = labelsAndPreds.filter(lambda (v, p): v != p).count() / float(testData.count())
+	baselineErr = testData.filter(lambda p: p.label == 1.0).count() / float(testData.count())
+	meanLabel = labelsAndPreds.map(lambda (l, p): l).mean()
+	meanGuess = labelsAndPreds.map(lambda (l, p): p).mean()
+
+	print("0 | Recall = " + str(recall0) + " | Precision = " + str(precision0) + "\n1 | Recall = " + str(recall1) + " | Precision = " + str(precision1) + "\nTest Error = " + str(trainErr) + '\n' + 'Baseline Error = ' + str(baselineErr) + "\nMean Label = " + str(meanLabel) + "\nMean Prediction = " + str(meanGuess))
 
 
-
+evaluateModel(model, testData)
 
