@@ -72,7 +72,7 @@ def getTrackLabels(dbpath, verbose=False):
 	
 	if verbose: print(trackRocks.take(3))
 
-	return trackRocks
+	return trackRocks.map(lambda (tr, rocks): (tr, (0.0 if rocks is None else rocks, data)))
 
 def getTrackFeatures(dbpath, verbose=False):
 	# get song data and merge
@@ -84,7 +84,7 @@ def getTrackFeatures(dbpath, verbose=False):
 	#list(h5py.File(dbpath+file_name, 'r')['analysis']['songs'][:])[0][30]
 	songData = sc.parallelize(h5py.File(dbpath+file_name, 'r')['analysis']['songs'][:]).map(lambda x: (x[30], (x[3], x[4], x[21], x[23], x[24], x[27], x[28])))
 	
-	if verbose: songData.take(3);
+	if verbose: print(songData.take(3));
 
 	return songData
 
@@ -101,7 +101,7 @@ def getTrackFeatures(dbpath, verbose=False):
 songData = getTrackFeatures(dbpath)
 trackRocks = getTrackLabels(dbpath)
 
-allData = trackRocks.join(songData).map(lambda (tr, (rocks, data)): (tr, (0.0 if rocks is None else rocks, data)))
+allData = trackRocks.join(songData)
 allData.take(3)
 
 # label data
