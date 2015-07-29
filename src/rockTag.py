@@ -106,42 +106,40 @@ def getLabelsAndFeatures(dbpath, tagstring='rock', verbose=False):
 
 	return (labels, features)
 
-
 sc = SparkContext('local', 'Rock Tag')
 verbose = False
 
 dbpath = '/root/data/AdditionalFiles/'
 tagstring = 'rock'
 
-labels, features = getLabelsAndFeatures(dbpath, tagstring=tagstring, verbose=verbose)
+labels, features = getLabelsAndFeatures(dbpath, tagstring=tagstring, scale_features=True, feature_scaler=None, verbose=verbose)
 
 std = StandardScaler(True, True).fit(features)
 scaledFeatures = std.transform(features)
 
 labeledData = labels.zip(scaledFeatures).map(lambda (label, data): LabeledPoint(label, data))
+if verbose: labeledData.take(3)
 
-# uses all extracted
-#labeledData = allData.map(lambda (tr, (rocks, data)): LabeledPoint(rocks, [x for x in data]))
+def rebalanceSample(labeledData):
+	# make sample sizes equal
+	labeled1 = labeledData.filter(lambda p: p.label == 1.0)
+	labeled1.count()
+	labeled1.map(lambda p: p.features[0]).mean()
+	nrock = labeled1.count()
 
-labeledData.take(3)
+	labeled0 = labeledData.filter(lambda p: p.label != 1.0)
+	labeled0.map(lambda p: p.features[0]).mean()
+	nxrock = labeled0.count()
 
-# make sample sizes equal
-labeledRock = labeledData.filter(lambda p: p.label == 1.0)
-labeledRock.count()
-labeledRock.map(lambda p: p.features[0]).mean()
-nrock = labeledRock.count()
+	cutoff = float(nrock) / (nrock + nxrock)
 
-labeledNotRock = labeledData.filter(lambda p: p.label != 1.0)
-labeledNotRock.map(lambda p: p.features[0]).mean()
-nxrock = labeledNotRock.count()
+	# recombine
+	return labeled1.union(labeled0.filter(lambda: random.random() < cutoff))
 
-cutoff = float(nrock) / (nrock + nxrock)
-
-# recombine
-equalSampleData = labeledRock.union(labeledNotRock)
+	#equalSampleData = labeledData.filter(lambda p: random.random() < cutoff if p.label != 1.0 else True)
 
 
-equalSampleData = labeledData.filter(lambda p: random.random() < cutoff if p.label != 1.0 else True)
+equalSampleData = rebalanceSample(labeledData)
 
 # split data
 trainData, testData = randomSplit(equalSampleData, [0.9, 0.1])
