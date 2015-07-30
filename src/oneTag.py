@@ -2,6 +2,7 @@ import sqlite3
 import sys, getopt
 import random
 import h5py
+import math
 from pyspark import SparkContext
 from pyspark.mllib.regression import LabeledPoint, LinearRegressionWithSGD
 from pyspark.mllib.classification import NaiveBayes, LogisticRegressionWithSGD, SVMWithSGD
@@ -72,16 +73,30 @@ def getTrackLabels(dbpath, tagstring='rock', verbose=False, usealldata=False):
 
 	return trackRocks.map(lambda (tr, rocks): (tr, 0.0 if rocks is None else rocks))
 
-def getTrackFeatures(dbpath, verbose=False, usealldata=False):
+def getTrackFeatures(dbpath, verbose=False, usealldata=False, nchunk=10000):
 	# get song data and merge
 
 	## Get song data from subset_msd_summary_file.h5[analysis][songs]
 	file_name = 'msd_summary_file.h5' if usealldata else 'subset_msd_summary_file.h5'
-	#songData = sc.parallelize(list(h5py.File(dbpath+file_name, 'r')['analysis']['songs'][:]))
+	
+
 	#list(h5py.File(dbpath+file_name, 'r')['analysis']['songs'][:])[0].length()
 	#list(h5py.File(dbpath+file_name, 'r')['analysis']['songs'][:])[0][30]
-	songData = sc.parallelize(h5py.File(dbpath+file_name, 'r')['analysis']['songs'][:]).map(lambda x: (x[30], (x[3], x[4], x[21], x[23], x[24], x[27], x[28])))
+	#songData = sc.parallelize(h5py.File(dbpath+file_name, 'r')['analysis']['songs'][:]).map(lambda x: (x[30], (x[3], x[4], x[21], x[23], x[24], x[27], x[28])))
+
+	nsongs = h5py.File(dbpath+file_name, 'r')['analysis']['songs'].len()
+	chunks = int(math.ceil(float(nsongs)/nchunk))
+
+	#songData = sc.parallelize(h5py.File(dbpath+file_name, 'r')['analysis']['songs'][0:nchunk]).map(lambda x: (x[30], (x[3], x[4], x[21], x[23], x[24], x[27], x[28])))
 	
+	for i in range(chunks):
+		start = i*nchunk
+		end = min((i+1)*nchunk, nsongs)
+		if i == 0:
+			songData = sc.parallelize(h5py.File(dbpath+file_name, 'r')['analysis']['songs'][start:end]).map(lambda x: (x[30], (x[3], x[4], x[21], x[23], x[24], x[27], x[28])))
+		else:
+			songData = songData.union(sc.parallelize(h5py.File(dbpath+file_name, 'r')['analysis']['songs'][start:end]).map(lambda x: (x[30], (x[3], x[4], x[21], x[23], x[24], x[27], x[28]))))
+
 	if verbose: print(songData.take(3));
 
 	return songData
