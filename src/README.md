@@ -14,6 +14,8 @@ If no data path is provided it assumes that the AdditionalFiles folder from the 
 
 Note that $SPARK_HOME is set to ```/usr/local/spark```
 
+Right now this works with the subset of data. I tried getting the full dataset AdditionalFiles and running this on it (I added the option -a or --alldata to the python script to do that), but spark runs out of memory.
+
 ## rockTagShell.py
 
 Runs in the shell (doesn't set up SparkContext because shell does that)
