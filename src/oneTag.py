@@ -195,14 +195,22 @@ def main(argv):
 	tagstring = 'rock'
 	usealldata = False
 
+	holdout = 0.1
+	model_iterations = 100
+	model_step = 1
+	model_intercept = True
+
+	# possible types logistic and svm
+	model_type = 'logistic'
+
 	try:
-		opts, args = getopt.getopt(argv,"hvd:t:a",["help","verbose","datapath=","tagstring=","alldata"])
+		opts, args = getopt.getopt(argv,"hvd:t:am:s:i:o:c",["help","verbose","datapath=","tagstring=","alldata","model=","step=","iterations=","holdout=","intercept"])
 	except getopt.GetoptError:
 		print 'rockTag.py -d <data path> -t <tag string>'
 		sys.exit(2)
 	for opt, arg in opts:
 		if opt == '-h':
-			print 'rockTag.py -d <data path> -t <tag string>'
+			print('rockTag.py -d <data path> -t <tag string>')
 			sys.exit()
 		elif opt in ("-v", "--verbose"):
 			verbose = True
@@ -212,6 +220,22 @@ def main(argv):
 			tagstring = str(arg).lower()
 		elif opt in ("-a", "--alldata"):
 			usealldata = True
+		elif opt in ("-m", "--model"):
+			if str(arg).lower() in ['logistic','svm']:
+				model_type = str(arg).lower
+			else:
+				print('valid models are logistic and svm')
+				sys.exit()
+		elif opt in ("-s", "--step"):
+			model_step = float(arg)
+		elif opt in ("-i", "--iterations"):
+			model_iterations = float(arg)
+		elif opt in ("-o", "--holdout"):
+			holdout = float(arg)
+			if holdout <= 0 | holdout >= 1:
+				print('holdout must be greater than 0 and less than 1')
+		elif opt in ("-c", "--intercept"):
+			model_intercept = True
 
 	if verbose:
 		print('data path: ' + dbpath)
@@ -231,13 +255,14 @@ def main(argv):
 	equalSampleData = rebalanceSample(labeledData, verbose=verbose)
 
 	# split data
-	trainData, testData = randomSplit(equalSampleData, [0.9, 0.1])
+	trainData, testData = randomSplit(equalSampleData, [1-holdout, holdout])
 	if verbose: trainData.map(lambda p: (p.label, p.features)).take(3)
 
 	# train model
-	model = LogisticRegressionWithSGD.train(trainData, intercept = True, iterations=1000)
-	#model = LinearRegressionWithSGD.train(trainData, step = 0.1, iterations=1000)
-	#model = SVMWithSGD.train(trainData, step=1, iterations=1000, intercept=True)
+	if model_type == 'logistic':
+		model = LogisticRegressionWithSGD.train(trainData, intercept=model_intercept, iterations=model_iterations, step=model_step)
+	elif model_type == 'svm':
+		model = SVMWithSGD.train(trainData, intercept=model_intercept, iterations=model_iterations, step=model_step)
 
 	evalString = evaluateModel(model, testData)
 	print(evalString)
