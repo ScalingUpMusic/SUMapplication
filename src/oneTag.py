@@ -11,6 +11,17 @@ from pyspark.mllib.feature import StandardScaler
 
 sc = SparkContext('local', 'One Tag')
 
+def fetchallChunks(cursor, chunksize=10000):
+    'uses fetchmany and parallelizes to keep memory usage down'
+    fetchrdd = sc.parallelize(cursor.fetchmany(chunksize))
+    while True:
+        results = cursor.fetchmany(chunksize)
+        if not results:
+            break
+        fetchrdd = fetchrdd.union(sc.parallelize(results))
+    return fetchrdd
+
+
 class RDDRangeSampler(RDDSamplerBase):
 	def __init__(self, lowerBound, upperBound, seed=None):
 		RDDSamplerBase.__init__(self, False, seed)
@@ -34,7 +45,7 @@ def randomSplit(rdd, weights, seed=None):
 		seed = random.randint(0, 2 ** 32 - 1)
 	return [rdd.mapPartitionsWithIndex(RDDRangeSampler(lb, ub, seed).func, True) for lb, ub in zip(cweights, cweights[1:])]
 
-def getTrackLabels(dbpath, tagstring='rock', verbose=False, usealldata=False):
+def getTrackLabels(dbpath, tagstring='rock', verbose=False, usealldata=False, chunksize=10000):
 
 	## Get artist mbtags from subset_artist_term.db (table = artist_mbtag)
 	dbname = 'artist_term.db' if usealldata else 'subset_artist_term.db'
@@ -42,7 +53,8 @@ def getTrackLabels(dbpath, tagstring='rock', verbose=False, usealldata=False):
 	with sqlite3.connect(dbpath+dbname) as conn:
 		c = conn.cursor()
 		c.execute("SELECT artist_id, mbtag FROM artist_mbtag")
-		artistTags = sc.parallelize(c.fetchall())
+		#artistTags = sc.parallelize(c.fetchall())
+		artistTags = fetchallChunks(cursor=c, chunksize=chunksize)
 
 	# group tags by artist
 	artistTagList = artistTags.groupByKey()
@@ -63,7 +75,8 @@ def getTrackLabels(dbpath, tagstring='rock', verbose=False, usealldata=False):
 	with sqlite3.connect(dbpath+dbname) as conn:
 		c = conn.cursor()
 		c.execute("SELECT artist_id, track_id FROM songs")
-		trackArtist = sc.parallelize(c.fetchall())
+		#trackArtist = sc.parallelize(c.fetchall())
+		trackArtist = fetchallChunks(cursor=c, chunksize=chunksize)
 
 	if verbose: print(trackArtist.take(3))
 
@@ -73,7 +86,7 @@ def getTrackLabels(dbpath, tagstring='rock', verbose=False, usealldata=False):
 
 	return trackRocks.map(lambda (tr, rocks): (tr, 0.0 if rocks is None else rocks))
 
-def getTrackFeatures(dbpath, verbose=False, usealldata=False, nchunk=10000):
+def getTrackFeatures(dbpath, verbose=False, usealldata=False, chunksize=10000):
 	# get song data and merge
 
 	## Get song data from subset_msd_summary_file.h5[analysis][songs]
@@ -85,13 +98,13 @@ def getTrackFeatures(dbpath, verbose=False, usealldata=False, nchunk=10000):
 	#songData = sc.parallelize(h5py.File(dbpath+file_name, 'r')['analysis']['songs'][:]).map(lambda x: (x[30], (x[3], x[4], x[21], x[23], x[24], x[27], x[28])))
 
 	nsongs = h5py.File(dbpath+file_name, 'r')['analysis']['songs'].len()
-	chunks = int(math.ceil(float(nsongs)/nchunk))
+	chunks = int(math.ceil(float(nsongs)/chunksize))
 
-	#songData = sc.parallelize(h5py.File(dbpath+file_name, 'r')['analysis']['songs'][0:nchunk]).map(lambda x: (x[30], (x[3], x[4], x[21], x[23], x[24], x[27], x[28])))
+	#songData = sc.parallelize(h5py.File(dbpath+file_name, 'r')['analysis']['songs'][:]).map(lambda x: (x[30], (x[3], x[4], x[21], x[23], x[24], x[27], x[28])))
 	
 	for i in range(chunks):
-		start = i*nchunk
-		end = min((i+1)*nchunk, nsongs)
+		start = i*chunksize
+		end = min((i+1)*chunksize, nsongs)
 		if i == 0:
 			songData = sc.parallelize(h5py.File(dbpath+file_name, 'r')['analysis']['songs'][start:end]).map(lambda x: (x[30], (x[3], x[4], x[21], x[23], x[24], x[27], x[28])))
 		else:
