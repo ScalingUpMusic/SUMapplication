@@ -6,7 +6,7 @@ Standalone python script for building a predictive model based on a provided tag
 
 Can run from src with the following command:
 
-	 $SPARK_HOME/bin/spark-submit --master local[4] oneTag.py -t <tag string> -d <data path> -v
+	 $SPARK_HOME/bin/spark-submit --master spark://spark1:7077 oneTag.py -t <tag string> -d <data path> -v
 
 All arguments are optionally (if no tag provided uses 'rock')
 

@@ -197,7 +197,7 @@ def main(argv):
 
 	holdout = 0.1
 	model_iterations = 100
-	model_step = 1
+	model_step = 1.0
 	model_intercept = True
 
 	# possible types logistic and svm
@@ -229,7 +229,7 @@ def main(argv):
 		elif opt in ("-s", "--step"):
 			model_step = float(arg)
 		elif opt in ("-i", "--iterations"):
-			model_iterations = float(arg)
+			model_iterations = int(arg)
 		elif opt in ("-o", "--holdout"):
 			holdout = float(arg)
 			if holdout <= 0 | holdout >= 1:
