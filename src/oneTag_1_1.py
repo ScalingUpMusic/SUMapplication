@@ -253,7 +253,7 @@ def main(argv):
 	
 	features = features.map(lambda data: [(v - m)/s for (v, m, s) in zip(data,means,sds)])
 	if verbose:
-		smry = Statistics.colStats(scaled)
+		smry = Statistics.colStats(features)
 		print(smry.mean())
 		print(smry.variance())
 
