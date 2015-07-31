@@ -3,6 +3,7 @@ import sys, getopt
 import random
 import h5py
 import math
+from pyspark.mllib.stat import Statistics
 from pyspark import SparkContext
 from pyspark.mllib.regression import LabeledPoint, LinearRegressionWithSGD
 from pyspark.mllib.classification import NaiveBayes, LogisticRegressionWithSGD, SVMWithSGD
@@ -244,6 +245,10 @@ def main(argv):
 	labels, features = getLabelsAndFeatures(dbpath, tagstring=tagstring, verbose=verbose, usealldata=usealldata)
 
 	# scale features
+	summary = Statistics.colStats(features)
+	print(summary.mean())
+	print(summary.variance())
+	print(summary.numNonzeros())
 #	std = StandardScaler(True, True).fit(features)
 #	scaledFeatures = std.transform(features)
 
