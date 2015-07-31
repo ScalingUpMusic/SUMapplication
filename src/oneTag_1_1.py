@@ -255,7 +255,7 @@ def main(argv):
 #	scaledFeatures = std.transform(features)
 	
 	scaled = features.map(lambda data: [(v - m)/s for (v, m, s) in zip(data,means,sds)])
-	smry = Statistics.colStats(nomean)
+	smry = Statistics.colStats(scaled)
 	print(smry.mean())
 	print(smry.variance())
 
