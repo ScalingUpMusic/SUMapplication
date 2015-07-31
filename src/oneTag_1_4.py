@@ -245,10 +245,10 @@ def main(argv):
 
 	# scale features
 	std = StandardScaler(True, True).fit(features)
-	scaledFeatures = std.transform(features)
+	features = std.transform(features)
 
 	# make labeled data
-	labeledData = labels.zip(scaledFeatures).map(lambda (label, data): LabeledPoint(label, data))
+	labeledData = labels.zip(features).map(lambda (label, data): LabeledPoint(label, data))
 	if verbose: labeledData.take(3)
 
 	# rebalance samples

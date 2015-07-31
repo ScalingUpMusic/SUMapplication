@@ -248,20 +248,18 @@ def main(argv):
 	summary = Statistics.colStats(features)
 	means = summary.mean()
 	sds = [vr**0.5 for vr in summary.variance()]
-	print(summary.mean())
-	print(summary.variance())
-	print(summary.numNonzeros())
 #	std = StandardScaler(True, True).fit(features)
-#	scaledFeatures = std.transform(features)
+#	features = std.transform(features)
 	
-	scaled = features.map(lambda data: [(v - m)/s for (v, m, s) in zip(data,means,sds)])
-	smry = Statistics.colStats(scaled)
-	print(smry.mean())
-	print(smry.variance())
+	features = features.map(lambda data: [(v - m)/s for (v, m, s) in zip(data,means,sds)])
+	if verbose:
+		smry = Statistics.colStats(scaled)
+		print(smry.mean())
+		print(smry.variance())
 
 
 	# make labeled data
-#	labeledData = labels.zip(scaledFeatures).map(lambda (label, data): LabeledPoint(label, data))
+#	labeledData = labels.zip(features).map(lambda (label, data): LabeledPoint(label, data))
 	labeledData = labels.zip(features).map(lambda (label, data): LabeledPoint(label, data))
 	if verbose: labeledData.take(3)
 
