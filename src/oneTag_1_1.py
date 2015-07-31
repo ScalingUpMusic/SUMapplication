@@ -246,11 +246,15 @@ def main(argv):
 
 	# scale features
 	summary = Statistics.colStats(features)
+	means = summary.mean()
 	print(summary.mean())
 	print(summary.variance())
 	print(summary.numNonzeros())
 #	std = StandardScaler(True, True).fit(features)
 #	scaledFeatures = std.transform(features)
+	
+	nomean = features.map(lambda data: [v - m for (v, m) in zip(data,means)])
+	print(Statistics.colStats(nomean).mean())
 
 	# make labeled data
 #	labeledData = labels.zip(scaledFeatures).map(lambda (label, data): LabeledPoint(label, data))
