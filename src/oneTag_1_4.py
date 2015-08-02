@@ -9,7 +9,7 @@ from pyspark.mllib.classification import NaiveBayes, LogisticRegressionWithSGD, 
 from pyspark.rddsampler import RDDSamplerBase
 from pyspark.mllib.feature import StandardScaler
 
-sc = SparkContext('local', 'One Tag')
+sc = SparkContext(appName='One Tag')
 
 def fetchallChunks(cursor, chunksize=10000):
     'uses fetchmany and parallelizes to keep memory usage down'
