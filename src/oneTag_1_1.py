@@ -87,9 +87,9 @@ def getTrackLabels(dbpath, tagstring='rock', verbose=False, usealldata=False, ch
 		print('OUTPUT: Track and Artist')
 		print(trackArtist.take(3))
 
-	#trackRocks = trackArtist.leftOuterJoin(artistRocks).map(lambda (ar, (tr, rocks)): (tr, rocks))
+	trackRocks = trackArtist.leftOuterJoin(artistRocks).map(lambda (ar, (tr, rocks)): (tr, rocks))
 	#trackRocks = trackArtist.join(artistRocks).map(lambda (ar, (tr, rocks)): (tr, rocks))
-	trackRocks = trackArtist.cogroup(artistRocks)
+	#trackRocks = trackArtist.cogroup(artistRocks)
 	
 	if verbose:
 		print('OUTPUT: Track has Tag') 
