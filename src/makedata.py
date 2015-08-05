@@ -2,6 +2,10 @@ import os
 import h5py
 import numpy
 import string
+from pyspark import SparkContext
+
+# to run:
+# $SPARK_HOME/bin/spark-submit --master spark://159.8.21.48:7077 makedata.py
 
 sc = SparkContext(appName='H5 2 Tuples')
 
