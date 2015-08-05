@@ -1,4 +1,4 @@
-import os
+import os, sys
 import h5py
 import numpy
 import string
@@ -48,9 +48,9 @@ def main(argv):
 	file_list.collect()
 
 	tagdata = file_list.map(lambda fpath: h52tuple(fpath))
-	tagdata.collect()
+	tagdata.count()
 
-	tagdata.saveAsTextFile('/root/data/summary')
+	#tagdata.saveAsTextFile('/root/data/summary')
 
 	### ambari
 	#salt on each machine 
