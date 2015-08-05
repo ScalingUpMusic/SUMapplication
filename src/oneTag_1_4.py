@@ -106,9 +106,9 @@ def getTrackFeatures(dbpath, verbose=False, usealldata=False, chunksize=10000):
 		start = i*chunksize
 		end = min((i+1)*chunksize, nsongs)
 		if i == 0:
-			songData = sc.parallelize(h5py.File(dbpath+file_name, 'r')['analysis']['songs'][start:end]).map(lambda x: (x[30], (x[3], x[4], x[21], x[23], x[24], x[27], x[28])))
+			songData = sc.parallelize(h5py.File(dbpath+file_name, 'r')['analysis']['songs'][start:end]).map(lambda x: (x[30], [x[3], x[4], x[21], x[23], x[24], x[27], x[28]]))
 		else:
-			songData = songData.union(sc.parallelize(h5py.File(dbpath+file_name, 'r')['analysis']['songs'][start:end]).map(lambda x: (x[30], (x[3], x[4], x[21], x[23], x[24], x[27], x[28]))))
+			songData = songData.union(sc.parallelize(h5py.File(dbpath+file_name, 'r')['analysis']['songs'][start:end]).map(lambda x: (x[30], [x[3], x[4], x[21], x[23], x[24], x[27], x[28]])))
 
 	if verbose: print(songData.take(3));
 

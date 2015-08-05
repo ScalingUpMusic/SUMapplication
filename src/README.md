@@ -25,3 +25,4 @@ Runs in the shell (doesn't set up SparkContext because shell does that)
 downloaded additional files
 
 	rsync -avzuP publicdata.opensciencedatacloud.org::ark:/31807/osdc-c1c763e4/AdditionalFiles.tar.gz /root/data/AdditionalFiles.tar.gz
+	tar -zxvf AdditionalFiles.tar.gz

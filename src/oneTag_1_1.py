@@ -10,7 +10,7 @@ from pyspark.mllib.classification import NaiveBayes, LogisticRegressionWithSGD, 
 from pyspark.rddsampler import RDDSamplerBase
 #from pyspark.mllib.feature import StandardScaler
 
-sc = SparkContext('local', 'One Tag')
+sc = SparkContext(appName='One Tag')
 
 def fetchallChunks(cursor, chunksize=10000):
     'uses fetchmany and parallelizes to keep memory usage down'
@@ -60,12 +60,16 @@ def getTrackLabels(dbpath, tagstring='rock', verbose=False, usealldata=False, ch
 	# group tags by artist
 	artistTagList = artistTags.groupByKey()
 
-	if verbose: print(artistTagList.take(3))
+	if verbose:
+		print('OUTPUT: Artist Tags') 
+		print(artistTagList.take(3))
 	
 	# check if rock in group tag or not
 	artistRocks = artistTagList.map(lambda (ar, tags): (ar, float(sum([tagstring in tag.lower() for tag in tags]) > 0)))
 	
-	if verbose: print(artistRocks.take(3))
+	if verbose: 
+		print('OUTPUT: Artist Has Tag')
+		print(artistRocks.take(3))
 
 	# merge song with artist
 
@@ -79,11 +83,17 @@ def getTrackLabels(dbpath, tagstring='rock', verbose=False, usealldata=False, ch
 		#trackArtist = sc.parallelize(c.fetchall())
 		trackArtist = fetchallChunks(cursor=c, chunksize=chunksize)
 
-	if verbose: print(trackArtist.take(3))
+	if verbose: 
+		print('OUTPUT: Track and Artist')
+		print(trackArtist.take(3))
 
 	trackRocks = trackArtist.leftOuterJoin(artistRocks).map(lambda (ar, (tr, rocks)): (tr, rocks))
+	#trackRocks = trackArtist.join(artistRocks).map(lambda (ar, (tr, rocks)): (tr, rocks))
+	#trackRocks = trackArtist.cogroup(artistRocks)
 	
-	if verbose: print(trackRocks.take(3))
+	if verbose:
+		print('OUTPUT: Track has Tag') 
+		print(trackRocks.take(3))
 
 	return trackRocks.map(lambda (tr, rocks): (tr, 0.0 if rocks is None else rocks))
 
@@ -100,18 +110,33 @@ def getTrackFeatures(dbpath, verbose=False, usealldata=False, chunksize=10000):
 
 	nsongs = h5py.File(dbpath+file_name, 'r')['analysis']['songs'].len()
 	chunks = int(math.ceil(float(nsongs)/chunksize))
+	
+	if verbose:
+		print('OUTPUT: Number of Songs and Chunks')
+		print(nsongs)
+		print(chunks)
 
 	#songData = sc.parallelize(h5py.File(dbpath+file_name, 'r')['analysis']['songs'][:]).map(lambda x: (x[30], (x[3], x[4], x[21], x[23], x[24], x[27], x[28])))
-	
+
+	if verbose:
+		print('OUTPUT: MSD Summary Chunks')
+		
 	for i in range(chunks):
 		start = i*chunksize
-		end = min((i+1)*chunksize, nsongs)
+		end = min((i+1)*chunksize, nsongs) - 1
+	
+		print(i)	
+		print(start)
+		print(end)
+
 		if i == 0:
 			songData = sc.parallelize(h5py.File(dbpath+file_name, 'r')['analysis']['songs'][start:end]).map(lambda x: (x[30], [x[3], x[4], x[21], x[23], x[24], x[27], x[28]]))
 		else:
 			songData = songData.union(sc.parallelize(h5py.File(dbpath+file_name, 'r')['analysis']['songs'][start:end]).map(lambda x: (x[30], [x[3], x[4], x[21], x[23], x[24], x[27], x[28]])))
 
-	if verbose: print(songData.take(3));
+	if verbose: 
+		print('OUTPUT: Track Data')
+		print(songData.take(3));
 
 	return songData
 
@@ -130,7 +155,9 @@ def getLabelsAndFeatures(dbpath, tagstring='rock', verbose=False, usealldata=Fal
 	songData = getTrackFeatures(dbpath, verbose=verbose, usealldata=usealldata)
 	trackRocks = getTrackLabels(dbpath, tagstring=tagstring, verbose=verbose, usealldata=usealldata)
 	allData = trackRocks.join(songData)
-	if verbose: allData.take(3)
+	if verbose: 
+		print('OUTPUT: All Data')
+		print(allData.take(3))
 
 	# label data
 	labels = allData.map(lambda (tr, (rocks, data)): rocks)
@@ -152,6 +179,7 @@ def rebalanceSample(labeledData, verbose=False):
 	cutoff = float(n1) / (n1 + n0)
 
 	if verbose:
+		print('OUTPUT: Tag Presence Info')
 		print('Tags Match : ' + str(n1))
 		print('Tags Miss  : ' + str(n0))
 		print('Percent    : ' + str(cutoff))
@@ -239,6 +267,7 @@ def main(argv):
 			model_intercept = True
 
 	if verbose:
+		print('OUTPUT: Some Args')
 		print('data path: ' + dbpath)
 		print('tag string: ' + tagstring)
 
@@ -253,6 +282,7 @@ def main(argv):
 	
 	features = features.map(lambda data: [(v - m)/s for (v, m, s) in zip(data,means,sds)])
 	if verbose:
+		print('OUTPUT: check resized column')
 		smry = Statistics.colStats(features)
 		print(smry.mean())
 		print(smry.variance())
@@ -261,14 +291,18 @@ def main(argv):
 	# make labeled data
 #	labeledData = labels.zip(features).map(lambda (label, data): LabeledPoint(label, data))
 	labeledData = labels.zip(features).map(lambda (label, data): LabeledPoint(label, data))
-	if verbose: labeledData.take(3)
+	if verbose:
+		print('OUTPUT: Labeled Data')
+		print(labeledData.take(3))
 
 	# rebalance samples
 	equalSampleData = rebalanceSample(labeledData, verbose=verbose)
 
 	# split data
 	trainData, testData = randomSplit(equalSampleData, [1-holdout, holdout])
-	if verbose: trainData.map(lambda p: (p.label, p.features)).take(3)
+	if verbose: 
+		print('OUTPUT: Train Data')
+		trainData.map(lambda p: (p.label, p.features)).take(3)
 
 	# train model
 	if model_type == 'logistic':
