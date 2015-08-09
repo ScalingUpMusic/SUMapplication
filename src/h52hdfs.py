@@ -5,7 +5,7 @@ import string
 from pyspark import SparkContext
 
 # to run:
-# $SPARK_HOME/bin/spark-submit --master spark://159.8.21.48:7077 makedata.py
+# $SPARK_HOME/bin/spark-submit --master spark://159.8.21.48:7077 h52hdfs.py
 
 sc = SparkContext(appName='H5 2 Tuples')
 
@@ -41,22 +41,23 @@ def makeDirList(base_dir, depth=1):
 		return [base_dir]
 
 def main(argv):
-	fdir_base = '/gpfs/A/A/'
-	dir_list = sc.parallelize(makeDirList(fdir_base))
+	for a in list(string.ascii_uppercase):
+		dir_list = sc.parallelize(makeDirList('/gpfs/'+a+'/', depth=2))
+		#dir_list = sc.parallelize(makeDirList('/gpfs/A/A/', depth=1))
 
-	file_list = dir_list.flatMap(lambda fdir: [fdir + '/' + f for f in os.listdir(fdir)])
-	file_list.collect()
+		file_list = dir_list.flatMap(lambda fdir: [fdir + '/' + f for f in os.listdir(fdir)])
+		file_list.collect()
 
-	tagdata = file_list.map(lambda fpath: h52tuple(fpath))
-	tagdata.count()
+		tagdata = file_list.map(lambda fpath: h52tuple(fpath))
+		#print(tagdata.count())
 
-	#tagdata.saveAsTextFile('/root/data/summary')
-
-	### ambari
-	#salt on each machine 
-	#add slat master to host file
-	#control cluster from salt master
-	#start ambari from salt master
+		tagdata.saveAsTextFile('hdfs://ambari2.scup.net:8020/h52text/'+a)
+		### ambari
+		#salt on each machine 
+		#add slat master to host file
+		#control cluster from salt master
+		#start ambari from salt master
 
 if __name__ == "__main__":
    main(sys.argv[1:])
+
