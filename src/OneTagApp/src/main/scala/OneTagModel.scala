@@ -9,6 +9,7 @@ import org.apache.spark.mllib.linalg.Vectors
 import org.apache.spark.mllib.linalg.Vector
 import org.apache.spark.mllib.classification.{LogisticRegressionWithSGD, LogisticRegressionModel}
 import org.apache.spark.SparkContext
+import org.apache.spark.SparkConf
 
 import org.apache.spark.mllib.classification.SVMWithSGD
 import org.apache.spark.mllib.evaluation.BinaryClassificationMetrics
