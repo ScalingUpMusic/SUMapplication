@@ -7,13 +7,13 @@ cd to SUMapplication/src/OneTagApp
 
 Double check that the jar file built
 
-	find . -name \*.jar
+	find . -name \*one-tag-model*.jar
 
 # Instructions for running OneTagApp
 To run this file:
 
-	SPARK_HOME/bin/spark-submit --class "OneTagModel" $(find . -name \*.jar)
+	SPARK_HOME/bin/spark-submit --class "OneTagModel" $(find . -name \*one-tag-model*.jar)
 
 To run on ambari w/ our spark location:
 
-	/usr/hdp/current/spark-client/bin/spark-submit --class "OneTagModel" $(find . -name \*.jar)
+	/usr/hdp/current/spark-client/bin/spark-submit --class "OneTagModel" $(find . -name \*one-tag-model*.jar)
