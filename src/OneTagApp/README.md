@@ -10,10 +10,10 @@ Double check that the jar file built
 	find . -name \*one-tag-model*.jar
 
 # Instructions for running OneTagApp
-To run this file:
+To run this file training a model on \<tag\>:
 
-	SPARK_HOME/bin/spark-submit --class "OneTagModel" $(find . -name \*one-tag-model*.jar)
+	SPARK_HOME/bin/spark-submit --class "OneTagModel" $(find . -name \*one-tag-model*.jar) <tag>
 
-To run on ambari w/ our spark location:
+For example, to run on ambari w/ our spark location and \<tag\> "alternative":
 
-	/usr/hdp/current/spark-client/bin/spark-submit --class "OneTagModel" $(find . -name \*one-tag-model*.jar)
+	/usr/hdp/current/spark-client/bin/spark-submit --class "OneTagModel" $(find . -name \*one-tag-model*.jar) alternative
