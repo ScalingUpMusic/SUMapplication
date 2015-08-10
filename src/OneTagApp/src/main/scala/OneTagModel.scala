@@ -32,7 +32,13 @@ object OneTagModel {
 		val conf = new SparkConf().setAppName("OneTagModel")
 		val sc = new SparkContext(conf)
 
-		val tag = "rock"
+		// First arg is number of tags
+    	val tag = if(args.length > 0){
+            args(0).toString
+        }else{
+            "rock"
+        }
+
 		val verbose = true
 		val datapath = "hdfs://ambari2.scup.net:8020/h52text/"
 		val dir_start = "A"
