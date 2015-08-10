@@ -1,7 +1,10 @@
 // to run as of Aug 8
 // ssh root@198.23.83.41
 // ssh ambari2
-// /usr/hdp/current/spark-client/bin/spark-submit oneTag_app.scala
+// cd to SUMapplication/src/OneTagApp
+// sbt package (to build)
+// find . -name \*.jar (find the jar file)
+// /usr/hdp/current/spark-client/bin/spark-submit --class "OneTagModel" $(find . -name \*.jar)
 
 import org.apache.spark.mllib.regression.LabeledPoint
 import org.apache.spark.mllib.feature.StandardScaler
@@ -57,7 +60,8 @@ object OneTagModel {
 		val n = data_unbalanced.count()
 		val fraction_notag = ntag/(n-ntag)
 		if (verbose) {
-			println("VERBOSE - Percent Have Tags:\n".concat((ntag/n).toString))
+			println("VERBOSE - Number of Tracks:\n" + n.toString)
+			println("VERBOSE - Percent Have Tag '" + tag +  "':\n" + (ntag/n).toString)
 		}
 
 		// Rebalance data so we have as many 1s as 0s
