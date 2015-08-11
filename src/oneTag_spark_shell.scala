@@ -83,6 +83,6 @@ val aupr = metrics.areaUnderPR
 println("Area Under ROC = " + auroc)
 println("Area Under Precision-Recall = " +  aupr)
 
-
+model.save(sc, "saved_model_" + tag)
 
 
