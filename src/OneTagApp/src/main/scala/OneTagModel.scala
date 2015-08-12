@@ -10,7 +10,7 @@ import org.apache.spark.mllib.regression.LabeledPoint
 import org.apache.spark.mllib.feature.StandardScaler
 import org.apache.spark.mllib.linalg.Vectors
 import org.apache.spark.mllib.linalg.Vector
-import org.apache.spark.mllib.classification.{LogisticRegressionWithSGD, LogisticRegressionModel}
+import org.apache.spark.mllib.classification.{LogisticRegressionWithSGD, LogisticRegressionWithLBFGS, LogisticRegressionModel}
 import org.apache.spark.SparkContext
 import org.apache.spark.SparkConf
 
@@ -85,7 +85,7 @@ object OneTagModel {
 		val model = if (model_type.toLowerCase == "svm") {
 				new SVMWithSGD().setIntercept(model_intercept).run(train)
 			} else {
-				new LogisticRegressionWithSGD().setIntercept(model_intercept).run(train)	
+				new LogisticRegressionWithLBFGS().setIntercept(model_intercept).run(train)	
 			}
 
 		// Compute raw scores on the test set.
