@@ -161,7 +161,7 @@ ambalt2.sum.net
 ambalt3.sum.net
 ambalt4.sum.net
 ```
-In the Host Registration Information field provide the public ssh key used to provision all the machines
+In the Host Registration Information field provide the private ssh key used to provision all the machines
 
 ### Confirm Hosts
 
@@ -289,3 +289,107 @@ Trying with different configuraitons
 ```
 spark-submit --master yarn-cluster --num-executors 4 --executor-cores 3 --class "OneTagModel" $(find . -name \*one-tag-model*.jar) "uk"
 ``` 
+
+
+# Add New Nodes to Cluster
+
+slcli vs create -d sjc01 --os CENTOS_6_64 --cpu 4 --memory 16384 --hostname ambalt5 --domain sum.net --disk 100 --key scup_rb
+y
+slcli vs create -d sjc01 --os CENTOS_6_64 --cpu 4 --memory 16384 --hostname ambalt6 --domain sum.net --disk 100 --key scup_rb
+y
+
+## Update Salt
+
+Add new nodes to roster on master
+```
+vi /etc/salt/roster
+```
+
+Append content:
+```
+ambalt5.sum.net:
+  host: 169.54.147.186
+  user: root
+  passwd: \<pwd5\>
+ambalt6.sum.net:
+  host: 198.23.83.42
+  user: root
+  passwd: \<pwd6\>
+```
+
+Test new nodes
+```
+salt-ssh -i -E '.*[5-6]' test.ping
+```
+
+## Update Ambari
+
+### passwordless ssh
+
+Add the new nodes to the etc/hosts file on the master and pass update to every node.
+
+Append content:
+
+```
+169.54.147.186 ambalt5.sum.net ambalt5
+198.23.83.42 ambalt6.sum.net ambalt6
+```
+
+Then copy <code>/etc/hosts</code> around to **ALL** nodes
+```
+salt-ssh '*' cp.get_file /etc/hosts /etc/hosts
+```
+
+Also make sure new nodes have the private key
+```
+salt-ssh -E '.*[5-6]' cp.get_file /root/.ssh/id_rsa /root/.ssh/id_rsa
+```
+
+Also install and start ntpd on new hosts
+```
+salt-ssh -E '.*[5-6]' cmd.run 'yum -y install ntp ntpdate ntp-doc'
+salt-ssh -E '.*[5-6]' cmd.run 'chkconfig ntpd on'
+salt-ssh -E '.*[5-6]' cmd.run 'ntpdate pool.ntp.org'
+salt-ssh -E '.*[5-6]' cmd.run '/etc/init.d/ntpd start'
+```
+
+## Install xtra stuffs
+
+Mount gpfs on new hosts
+```
+salt-ssh -E '.*[5-6]' cmd.run 'mkdir /gpfs'
+salt-ssh -E '.*[5-6]' cmd.run 'yum -y install nfs-utils nfs-utils-lib'
+salt-ssh -E '.*[5-6]' cmd.run 'mount -t nfs 198.11.206.107:/gpfs/gpfsfpo /gpfs'
+```
+
+Install hdf5 on new hosts
+```
+salt-ssh -E '.*[5-6]' cmd.run 'wget http://pkgs.repoforge.org/rpmforge-release/rpmforge-release-0.5.3-1.el6.rf.x86_64.rpm'
+salt-ssh -E '.*[5-6]' cmd.run 'rpm --import http://apt.sw.be/RPM-GPG-KEY.dag.txt'
+salt-ssh -E '.*[5-6]' cmd.run 'rpm -i rpmforge-release-0.5.3-1.el6.rf.*.rpm'
+salt-ssh -E '.*[5-6]' cmd.run 'yum -y install hdf5 hdf5-devel'
+```
+
+**THIS FAILED - MAY  NEED AMBARI 1ST** Install pip & h5py
+```
+salt-ssh -E '.*[5-6]' cmd.run 'yum install -y python-setuptools'
+salt-ssh -E '.*[5-6]' cmd.run 'easy_install pip'
+salt-ssh -E '.*[5-6]' cmd.run 'pip install Cython'
+salt-ssh -E '.*[5-6]' cmd.run 'pip install h5py'
+salt-ssh -E '.*[5-6]' cmd.run 'pip install unittest2'
+```
+
+## Add hosts via Ambari
+
+Here are some pointers: http://hortonworks.com/hadoop-tutorial/using-apache-ambari-add-new-nodes-existing-cluster/
+
+Go to Hosts tab > Actions > Add New Hosts. Add new FQDNs:
+```
+ambalt5.sum.net
+ambalt6.sum.net
+```
+
+Copy & paste private key. Register. Success!
+
+Selected all for DataNode, NodeManager, and Client.<br>Next.<br>Next.<br>Deploy->
+
