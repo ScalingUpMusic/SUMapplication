@@ -287,7 +287,7 @@ The above took about 2 min to run.
 Trying with different configuraitons
 
 ```
-spark-submit --master yarn-cluster --num-executors 4 --executor-cores 3 --class "OneTagModel" $(find . -name \*one-tag-model*.jar) "uk"
+spark-submit --master yarn-cluster --num-executors 5 --driver-cores 4 --executor-memory 1G --executor-cores 8 --class "OneTagModel" $(find . -name \*one-tag-model*.jar) "uk"
 ``` 
 
 
