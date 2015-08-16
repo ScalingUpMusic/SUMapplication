@@ -5,7 +5,7 @@ import org.apache.spark.mllib.classification.{LogisticRegressionWithSGD, Logisti
 import scala.util.Random
 
 
-// get data
+// Parse string data into audio features
 def extractData(line:String) : Vector = {
     val array_string = "\\[.*?\\]".r
     val ars = (array_string findAllIn line).toList
@@ -14,38 +14,57 @@ def extractData(line:String) : Vector = {
     return Vectors.dense(data)
 }
 
+def extractTrackId(line:String) : String = {
+    val track_id = line.split("'")[1]
+    return track_id
+}
 
 
-val tag = "uk"
-
-// Get a random data file / song
+// Get a random list of songs by picking a random letter
 val dir_letter = (Random.nextInt(26) + 65).toChar
-val loadpath = "hdfs://ambari2.scup.net:8020/h52text/[" + dir_letter + "-" + dir_letter + "]"
+val file_path  = "hdfs://ambalt1.sum.net:8020/h52text/[" + dir_letter + "-" + dir_letter + "]"
 
-
-// Extract data from text file of the form ('TRACKID', (['tag1', 'tag2', ..., 'tagn'], [data1, data2, ..., datam]))
-val data_unscaled = sc.textFile(loadpath).take(1)
-val data_unscaled_p = sc.parallelize(data_unscaled).map(line => extractData(line))
-
-// Scale data to 0 mean and unit variance
-val sclr = new StandardScaler(withMean=true, withStd=true).fit(data_unscaled_p)
-val data_unbalanced = data_unscaled_p.map(x => sclr.transform(x))
+// Grab a random song from that random list, and get audio features
+val one_song_raw = sc.textFile(file_path).sample(false, 0.001).take(1).mkString("")
+val one_song_features = extractData(one_song_raw)
 
 
 
+/*
+The code below COULD be parallelized by simply wrapping the tag List in sc.parallelize()
+but sadly, there is some kind of Spark bug that gives this error when you do:
 
-// Run logistic regression
-val model_save_location = "saved_model_" + tag
-val model = LogisticRegressionModel.load(sc, model_save_location)
-model.clearThreshold()
+15/08/15 23:55:02 ERROR Executor: Exception in task 1.0 in stage 21.0 (TID 28)
+java.lang.NullPointerException
+	at org.apache.spark.mllib.util.Loader$.loadMetadata(modelSaveLoad.scala:125)
+	at org.apache.spark.mllib.classification.LogisticRegressionModel$.load(LogisticRegression.scala:171)
+*/
 
 
-// Make predictions
-val predictionAndLabels = data_unbalanced.map { features =>
-    model.predict(features)
-}
+val tags = List(
+    "american",
+    "british",
+    "classic pop and rock",
+    "country",
+    "english",
+    "hip hop",
+    "rock and indie",
+    "rock",
+    "uk"
+)
 
-predictionAndLabels.foreach {
-    println(_)
-}
 
+val tag_predictions = tags.map(tag => {
+    val model_save_location = "hdfs://ambalt1.sum.net:8020/tag_models/models/" + tag.replace(" ", "_") + "_model.model"
+    val model = LogisticRegressionModel.load(sc, model_save_location)
+    model.clearThreshold()
+    val prediction = model.predict(one_song_features)
+    
+    (tag, prediction)
+}).sortBy(_._2).reverse
+
+
+println(extractTrackId(one_song_raw))
+tag_predictions.foreach( prediction =>
+    println(prediction._1 + ":\t\t" + prediction._2)
+)
