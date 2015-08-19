@@ -1,4 +1,4 @@
-# Production Files
+# Production Code
 
 ## h52hdfs.py
 
@@ -9,7 +9,11 @@ To Run
 spark-submit --master yarn-cluster <options> h52hdfs.py
 ```
 
-# Old Files
+## MultiPredictorApp
+
+Spark scala application to load classification models saved to HDFS and hydrate them with data to make classification predictions.
+
+# Test Code
 
 ## oneTag_1_*.py
 
