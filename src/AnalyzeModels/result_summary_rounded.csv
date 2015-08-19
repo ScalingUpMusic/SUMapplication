@@ -1,0 +1,153 @@
+Tag,Song Count,AUROC,AUPRC,Time to Train
+classic pop and rock,57929,0.57,0.68,126
+american,54737,0.54,0.66,108
+rock,49449,0.53,0.68,115
+british,46432,0.53,0.66,141
+uk,45467,0.52,0.69,110
+rock and indie,42129,0.54,0.7,110
+english,33673,0.53,0.67,105
+folk,26449,0.65,0.74,202
+pop,22524,0.53,0.68,205
+punk,21137,0.67,0.75,200
+electronic,18031,0.62,0.71,202
+usa,16205,0.62,0.71,229
+hip hop rnb and dance hall,13605,0.66,0.75,324
+metal,13529,0.66,0.76,359
+german,13442,0.55,0.69,471
+jazz,13289,0.69,0.77,507
+alternative rock,12893,0.58,0.72,876
+pop and chart,11234,0.64,0.76,963
+dance and electronica,10306,0.63,0.72,111
+european,8550,0.59,0.68,100
+french,8423,0.56,0.66,101
+england,8414,0.63,0.72,110
+hard rock,8055,0.58,0.71,1067
+jazz and blues,7099,0.74,0.81,110
+progressive rock,6853,0.62,0.71,109
+blues,6760,0.64,0.72,109
+am\xc3\xa9ricain,6480,0.54,0.71,112
+indie rock,6399,0.57,0.72,109
+production music,6392,0.68,0.76,110
+hip hop,5902,0.66,0.75,160
+soul and reggae,5762,0.54,0.67,118
+classical,5758,0.78,0.85,200
+finnish,5712,0.63,0.75,228
+hip-hop,5669,0.67,0.76,263
+rnb,5389,0.63,0.73,582
+alternative,5294,0.56,0.71,105
+britannique,5189,0.53,0.7,133
+canadian,5185,0.53,0.69,1103
+heavy metal,5174,0.65,0.75,93
+electronica,5087,0.63,0.72,98
+swedish,4847,0.61,0.73,91
+new wave,4680,0.56,0.68,95
+soundtrack,4586,0.74,0.81,102
+easy listening soundtracks and musicals,4307,0.71,0.79,94
+world,4243,0.6,0.69,94
+soul,4140,0.54,0.68,94
+scottish,3864,0.54,0.67,97
+punk rock,3820,0.69,0.76,92
+london,3790,0.59,0.7,92
+italian,3739,0.57,0.65,101
+norwegian,3637,0.53,0.63,97
+united states,3525,0.57,0.72,93
+composer,3349,0.74,0.8,94
+80s,3326,0.58,0.66,97
+blues rock,3272,0.6,0.7,95
+synthpop,3222,0.6,0.74,100
+experimental,3206,0.58,0.66,96
+latin,3169,0.56,0.68,92
+pop rock,3059,0.56,0.72,101
+psychedelic rock,2896,0.56,0.67,100
+alternative metal,2893,0.65,0.76,95
+dance,2879,0.61,0.72,98
+chinese,2859,0.6,0.72,96
+ambient,2845,0.71,0.78,103
+thrash metal,2790,0.73,0.8,150
+90s,2730,0.54,0.63,163
+rock and roll,2611,0.67,0.76,179
+art rock,2606,0.56,0.65,174
+dutch,2597,0.53,0.68,153
+reggae,2570,0.53,0.7,143
+hiphop,2542,0.66,0.76,115
+folk rock,2510,0.64,0.73,104
+post-punk,2501,0.57,0.7,101
+rap,2497,0.66,0.75,103
+australian,2489,0.52,0.71,107
+warp,2418,0.62,0.72,103
+united kingdom,2356,0.54,0.71,92
+us,2348,0.53,0.67,95
+industrial,2305,0.63,0.74,97
+techno,2263,0.63,0.73,100
+death metal,2261,0.72,0.8,96
+70s,2257,0.56,0.67,93
+indie,2197,0.55,0.7,101
+4ad,2194,0.6,0.7,99
+swing,2185,0.71,0.78,93
+house,2143,0.66,0.75,96
+black metal,2085,0.71,0.79,103
+singer,2076,0.59,0.69,92
+funk,2054,0.56,0.66,92
+france,2051,0.54,0.68,94
+00s,2050,0.53,0.68,97
+soft rock,2023,0.57,0.69,96
+irish,1987,0.58,0.69,100
+trance,1926,0.71,0.78,102
+downtempo,1914,0.63,0.71,104
+california,1882,0.74,0.81,98
+ska,1864,0.68,0.76,110
+hardcore punk,1801,0.73,0.79,111
+gothic rock,1801,0.58,0.67,94
+canada,1773,0.56,0.68,95
+industrial metal,1760,0.68,0.77,100
+indie pop,1741,0.59,0.69,96
+producer,1740,0.55,0.7,94
+jamaican,1663,0.62,0.71,95
+experimental rock,1642,0.55,0.65,96
+disco,1552,0.58,0.72,93
+adult contemporary,1545,0.54,0.65,97
+progressive metal,1523,0.71,0.78,106
+francophone,1517,0.57,0.69,95
+eurovision,1493,0.63,0.74,95
+fran\xc3\xa7ais,1482,0.55,0.64,99
+new york,1470,0.61,0.71,94
+male vocalists,1436,0.55,0.68,93
+brazilian,1421,0.63,0.71,99
+mandarin,1416,0.62,0.72,97
+gospel,1414,0.66,0.74,105
+welsh,1400,0.57,0.71,97
+christian,1397,0.65,0.75,94
+instrumental,1384,0.65,0.74,93
+glam rock,1368,0.53,0.66,96
+hardcore,1358,0.69,0.78,111
+compositeur,1324,0.56,0.65,99
+melodic death metal,1322,0.74,0.81,95
+greek,1317,0.56,0.66,96
+spanish,1293,0.54,0.65,95
+industrial rock,1287,0.64,0.78,101
+the netherlands,1282,0.56,0.68,92
+post-rock,1272,0.64,0.74,103
+singer-songwriter,1266,0.69,0.78,96
+idm,1260,0.63,0.72,95
+bebop,1228,0.77,0.83,100
+trip-hop,1227,0.63,0.73,93
+big band,1210,0.75,0.82,111
+australia,1208,0.54,0.7,155
+post-grunge,1199,0.72,0.8,163
+espa\xc3\xb1ol,1192,0.57,0.71,159
+hong kong,1184,0.62,0.73,158
+10s,1182,0.53,0.66,159
+country rock,1148,0.67,0.77,141
+goth,1146,0.59,0.7,106
+taiwanese,1135,0.63,0.71,104
+lyricist,1122,0.56,0.7,107
+electro,1073,0.62,0.71,94
+dance-pop,1059,0.68,0.78,101
+los angeles,1052,0.65,0.73,98
+electro-industrial,1043,0.7,0.79,95
+classic rock,1037,0.62,0.73,92
+britpop,1032,0.54,0.63,102
+parolier,1031,0.55,0.67,96
+chanteur,1029,0.57,0.7,91
+hard bop,1019,0.77,0.81,95
+new age,1008,0.68,0.75,97

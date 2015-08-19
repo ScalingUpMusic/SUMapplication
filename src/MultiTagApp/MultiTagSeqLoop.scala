@@ -1,11 +1,3 @@
-// to run as of Aug 8
-// ssh to spark master (ambari2)
-// cd to SUMapplication/src/OneTagApp
-// sbt package (to build)
-// find . -name \*.jar (find the jar file)
-// find . -name \*one-tag-model*.jar
-// /usr/hdp/current/spark-client/bin/spark-submit --class "OneTagModel" $(find . -name \*one-tag-model*.jar) <tag>
-
 import org.apache.spark.mllib.regression.LabeledPoint
 import org.apache.spark.mllib.feature.StandardScaler
 import org.apache.spark.mllib.linalg.Vectors
