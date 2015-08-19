@@ -1,6 +1,13 @@
 # Production Files
 
-## h52text.py
+## h52hdfs.py
+
+This file extracts features from every track .h5 file (1 million songs) in our GPFS cluster and saves the results in a row of a text file on our HDFS cluster.
+
+To Run
+```
+spark-submit --master yarn-cluster <options> h52hdfs.py
+```
 
 # Old Files
 
