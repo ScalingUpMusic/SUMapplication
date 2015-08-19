@@ -43,7 +43,7 @@ object MultiPredictorApp {
         
         // Evaluate the audio features against each model and generate a list of predictions
         val tag_predictions = tags.collect.map(tag => {
-            val model_save_location = "hdfs://ambalt1.sum.net:8020/tag_models/models/" + tag.replace(" ", "_") + "_model.model"
+            val model_save_location = "hdfs://ambalt1.sum.net:8020/tag_models/models/" + tag.replace(" ", "_").replace("\\", "") + "_model.model"
             
 	    println(tag)
             val model = SVMModel.load(sc, model_save_location)
@@ -60,7 +60,7 @@ object MultiPredictorApp {
         println("GENRE TAG                    | SVM MARGIN")
         println("-----------------------------+-----------------------------")
         
-        tag_predictions.slice(0, 20).foreach( prediction => {
+        tag_predictions.foreach( prediction => {
             val tag_name = prediction._1
             val probability = prediction._2
             println(f"$tag_name%-28s | $probability%s")
