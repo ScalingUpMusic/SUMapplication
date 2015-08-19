@@ -1,4 +1,8 @@
-# Source Files
+# Production Files
+
+## h52text.py
+
+# Old Files
 
 ## oneTag.py
 
@@ -20,9 +24,3 @@ Right now this works with the subset of data. I tried getting the full dataset A
 
 Runs in the shell (doesn't set up SparkContext because shell does that)
 
-## data notes
-
-downloaded additional files
-
-	rsync -avzuP publicdata.opensciencedatacloud.org::ark:/31807/osdc-c1c763e4/AdditionalFiles.tar.gz /root/data/AdditionalFiles.tar.gz
-	tar -zxvf AdditionalFiles.tar.gz
