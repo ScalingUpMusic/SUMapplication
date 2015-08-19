@@ -40,48 +40,20 @@ With content:
 ambalt1.sum.net:
   host: 169.54.147.167
   user: root
-  passwd: \<pwd1\>
+  passwd: <pwd1>
 ambalt2.sum.net:
   host: 169.54.147.173
   user: root
-  passwd: \<pwd2\>
+  passwd: <pwd2>
 ambalt3.sum.net:
   host: 198.23.83.44
   user: root
-  passwd: \<pwd3\>
+  passwd: <pwd3>
 ambalt4.sum.net:
   host: 169.54.147.170
   user: root
-  passwd: \<pwd4\>
+  passwd: <pwd4>
 ```
-
-
-//////////////
-
-// This MAY or MAY NOT be necessary:
-
-Set up a salt master file:
-
-```
-vi /etc/salt/master
-```
-
-As follows:
-
-```
-file_roots:
-  base:
-    - /srv/salt
-
-fileserver_backend:
-  - roots
-
-pillar_roots:
-  base:
-    - /srv/pillar
-```
-
-////////////
 
 Test salt-ssh
 ```
@@ -310,11 +282,11 @@ Append content:
 ambalt5.sum.net:
   host: 169.54.147.186
   user: root
-  passwd: \<pwd5\>
+  passwd: <pwd5>
 ambalt6.sum.net:
   host: 198.23.83.42
   user: root
-  passwd: \<pwd6\>
+  passwd: <pwd6>
 ```
 
 Test new nodes
@@ -353,7 +325,34 @@ salt-ssh -E '.*[5-6]' cmd.run 'ntpdate pool.ntp.org'
 salt-ssh -E '.*[5-6]' cmd.run '/etc/init.d/ntpd start'
 ```
 
-## Install xtra stuffs
+
+
+**THIS FAILED - MAY  NEED AMBARI 1ST** 
+
+## Add hosts via Ambari
+
+Here are some pointers: http://hortonworks.com/hadoop-tutorial/using-apache-ambari-add-new-nodes-existing-cluster/
+
+Go to Hosts tab > Actions > Add New Hosts. Add new FQDNs:
+```
+ambalt5.sum.net
+ambalt6.sum.net
+```
+
+Copy & paste private key. Register. Success!
+
+Selected all for DataNode, NodeManager, and Client.<br>Next.<br>Next.<br>Deploy->
+
+### Install extra packages on our new hosts
+
+Install pip & h5py
+```
+salt-ssh -E '.*[5-6]' cmd.run 'yum install -y python-setuptools'
+salt-ssh -E '.*[5-6]' cmd.run 'easy_install pip'
+salt-ssh -E '.*[5-6]' cmd.run 'pip install Cython'
+salt-ssh -E '.*[5-6]' cmd.run 'pip install h5py'
+salt-ssh -E '.*[5-6]' cmd.run 'pip install unittest2'
+```
 
 Mount gpfs on new hosts
 ```
@@ -369,27 +368,4 @@ salt-ssh -E '.*[5-6]' cmd.run 'rpm --import http://apt.sw.be/RPM-GPG-KEY.dag.txt
 salt-ssh -E '.*[5-6]' cmd.run 'rpm -i rpmforge-release-0.5.3-1.el6.rf.*.rpm'
 salt-ssh -E '.*[5-6]' cmd.run 'yum -y install hdf5 hdf5-devel'
 ```
-
-**THIS FAILED - MAY  NEED AMBARI 1ST** Install pip & h5py
-```
-salt-ssh -E '.*[5-6]' cmd.run 'yum install -y python-setuptools'
-salt-ssh -E '.*[5-6]' cmd.run 'easy_install pip'
-salt-ssh -E '.*[5-6]' cmd.run 'pip install Cython'
-salt-ssh -E '.*[5-6]' cmd.run 'pip install h5py'
-salt-ssh -E '.*[5-6]' cmd.run 'pip install unittest2'
-```
-
-## Add hosts via Ambari
-
-Here are some pointers: http://hortonworks.com/hadoop-tutorial/using-apache-ambari-add-new-nodes-existing-cluster/
-
-Go to Hosts tab > Actions > Add New Hosts. Add new FQDNs:
-```
-ambalt5.sum.net
-ambalt6.sum.net
-```
-
-Copy & paste private key. Register. Success!
-
-Selected all for DataNode, NodeManager, and Client.<br>Next.<br>Next.<br>Deploy->
 
