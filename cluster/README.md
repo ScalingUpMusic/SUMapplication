@@ -325,10 +325,6 @@ salt-ssh -E '.*[5-6]' cmd.run 'ntpdate pool.ntp.org'
 salt-ssh -E '.*[5-6]' cmd.run '/etc/init.d/ntpd start'
 ```
 
-
-
-**THIS FAILED - MAY  NEED AMBARI 1ST** 
-
 ## Add hosts via Ambari
 
 Here are some pointers: http://hortonworks.com/hadoop-tutorial/using-apache-ambari-add-new-nodes-existing-cluster/
