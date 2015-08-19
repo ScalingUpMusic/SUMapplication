@@ -115,7 +115,7 @@ Rename file that will be used in set up later (for whatever reason the Ambari cl
 cp /etc/yum.repos.d/ambaribn.repo /etc/yum.repos.d/ambari.repo
 ```
 
-Open ambari on a browser <code> http://169.54.147.180:8080 </code> with user = admin, starting password = admin. Then change the password on the UI: users/admin/password
+Open ambari on a browser <code> http://169.54.147.180:8080 </code> with user = admin, starting password = admin. Then change the password on the UI: users > admin > password
 
 ### Install Wizard
 
@@ -141,7 +141,7 @@ This should work, if not - woops (make sure you installed & started ntpd and cha
 
 ### Service Selection
 
-Not really sure which we need - I got all the ones that seemed necessary for managing Yarn, Hadoop and obviously spark:
+Not really sure which we need - We probably over did it for just managing Yarn, Hadoop and obviously Spark:
 ```
 HDFS
 YARN + MapReduce2
