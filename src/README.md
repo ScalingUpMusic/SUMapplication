@@ -11,9 +11,9 @@ spark-submit --master yarn-cluster <options> h52hdfs.py
 
 # Old Files
 
-## oneTag.py
+## oneTag_1_*.py
 
-Standalone python script for building a predictive model based on a provided tag.
+Standalone python script for building a predictive model based on a provided tag. We had to create a couple versions as we struggled with some older versions of Spark.
 
 Can run from src with the following command:
 
