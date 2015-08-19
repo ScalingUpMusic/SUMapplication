@@ -345,15 +345,6 @@ Selected all for DataNode, NodeManager, and Client.<br>Next.<br>Next.<br>Deploy-
 
 ### Install extra packages on our new hosts
 
-Install pip & h5py
-```
-salt-ssh -E '.*[5-6]' cmd.run 'yum install -y python-setuptools'
-salt-ssh -E '.*[5-6]' cmd.run 'easy_install pip'
-salt-ssh -E '.*[5-6]' cmd.run 'pip install Cython'
-salt-ssh -E '.*[5-6]' cmd.run 'pip install h5py'
-salt-ssh -E '.*[5-6]' cmd.run 'pip install unittest2'
-```
-
 Mount gpfs on new hosts
 ```
 salt-ssh -E '.*[5-6]' cmd.run 'mkdir /gpfs'
@@ -369,3 +360,11 @@ salt-ssh -E '.*[5-6]' cmd.run 'rpm -i rpmforge-release-0.5.3-1.el6.rf.*.rpm'
 salt-ssh -E '.*[5-6]' cmd.run 'yum -y install hdf5 hdf5-devel'
 ```
 
+Install pip & h5py
+```
+salt-ssh -E '.*[5-6]' cmd.run 'yum install -y python-setuptools'
+salt-ssh -E '.*[5-6]' cmd.run 'easy_install pip'
+salt-ssh -E '.*[5-6]' cmd.run 'pip install Cython'
+salt-ssh -E '.*[5-6]' cmd.run 'pip install h5py'
+salt-ssh -E '.*[5-6]' cmd.run 'pip install unittest2'
+```
