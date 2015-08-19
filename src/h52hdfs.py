@@ -5,7 +5,7 @@ import string
 from pyspark import SparkContext
 
 # to run:
-# $SPARK_HOME/bin/spark-submit --master spark://159.8.21.48:7077 h52hdfs.py
+# spark-submit --master yarn-lcuster h52hdfs.py
 
 sc = SparkContext(appName='H5 2 Tuples')
 
@@ -51,12 +51,7 @@ def main(argv):
 		tagdata = file_list.map(lambda fpath: h52tuple(fpath))
 		#print(tagdata.count())
 
-		tagdata.saveAsTextFile('hdfs://ambari2.scup.net:8020/h52text/'+a)
-		### ambari
-		#salt on each machine 
-		#add slat master to host file
-		#control cluster from salt master
-		#start ambari from salt master
+		tagdata.saveAsTextFile('hdfs://ambalt1.sum.net:8020/h52text/'+a)
 
 if __name__ == "__main__":
    main(sys.argv[1:])

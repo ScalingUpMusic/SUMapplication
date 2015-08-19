@@ -11,11 +11,27 @@ cd /home/spark
 su spark
 
 
-# Source Files
+# Production Code
 
-## oneTag.py
 
-Standalone python script for building a predictive model based on a provided tag.
+## h52hdfs.py
+
+This file extracts features from every track .h5 file (1 million songs) in our GPFS cluster and saves the results in a row of a text file on our HDFS cluster.
+
+To Run
+```
+spark-submit --master yarn-cluster <options> h52hdfs.py
+```
+
+## MultiPredictorApp
+
+Spark scala application to load classification models saved to HDFS and hydrate them with data to make classification predictions.
+
+# Test Code
+
+## oneTag_1_*.py
+
+Standalone python script for building a predictive model based on a provided tag. We had to create a couple versions as we struggled with some older versions of Spark.
 
 Can run from src with the following command:
 
@@ -32,6 +48,7 @@ Right now this works with the subset of data. I tried getting the full dataset A
 ## rockTagShell.py
 
 Runs in the shell (doesn't set up SparkContext because shell does that)
+
 
 ## data notes
 
